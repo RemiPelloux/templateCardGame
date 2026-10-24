@@ -1,7 +1,7 @@
 # Testing
 
 Four kinds of tests, each proving something different. `pnpm verify` runs everything except
-the browser tests; CI runs those too.
+the browser tests: run `pnpm test:e2e` too when the UI or the API changed.
 
 | Kind        | Proves                                                 | Run             |
 | ----------- | ------------------------------------------------------ | --------------- |
