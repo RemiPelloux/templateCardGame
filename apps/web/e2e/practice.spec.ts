@@ -14,5 +14,5 @@ test('practice against bots: the table deals and accepts a move', async ({ page 
   const suitPicker = page.getByRole('group', { name: 'Name a suit' });
   if (await suitPicker.isVisible())
     await suitPicker.getByRole('button', { name: /Hearts/ }).click();
-  await expect(page.getByLabel('Game log').getByRole('listitem').first()).toContainText('You');
+  await expect(page.getByLabel('Log').getByRole('listitem').first()).toContainText('You');
 });

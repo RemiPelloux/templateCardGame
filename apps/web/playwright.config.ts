@@ -8,13 +8,20 @@ export default defineConfig({
   fullyParallel: true,
   workers: 2,
   reporter: process.env.CI ? 'github' : 'list',
-  use: { baseURL: `http://127.0.0.1:${PORT}`, trace: 'retain-on-failure' },
+  use: { baseURL: `http://127.0.0.1:${PORT}`, trace: 'retain-on-failure', locale: 'en-GB' },
   // One browser keeps a run light; add projects (phone, Firefox…) when the game needs them.
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: `pnpm build && pnpm --filter @cardgame/server start`,
     url: `http://127.0.0.1:${PORT}/api/health`,
     reuseExistingServer: false,
-    env: { PORT: String(PORT), HOST: '127.0.0.1', DB_PATH: ':memory:', LOG_REQUESTS: '0' },
+    env: {
+      PORT: String(PORT),
+      HOST: '127.0.0.1',
+      DB_PATH: ':memory:',
+      LOG_REQUESTS: '0',
+      PASSWORD_COST: 'test',
+      RELAXED_LIMITS: '1',
+    },
   },
 });

@@ -18,6 +18,8 @@
   --danger-bg: #fde8e4;
   --danger-ink: #8a1c0f;
   --online: #22a35a;
+  --info-bg: #e6f0e9;
+  --gold: #ca8a04;
 
   --felt: #1f6b45;
   --felt-deep: #134a2f;
@@ -42,6 +44,7 @@
   --space-8: 32px;
   --control-height: 44px;
   --page-max: 1100px;
+  --tabbar-height: 60px;
 
   --card-width: clamp(58px, 9vw, 92px);
   --card-ratio: 1.4;
@@ -66,6 +69,8 @@
     --focus: #60a5fa;
     --danger-bg: #3b1512;
     --danger-ink: #fecaca;
+    --info-bg: #1d3326;
+    --gold: #facc15;
     --felt: #164d33;
     --felt-deep: #0c2f1f;
     --card-face: #f6f2e8;

@@ -32,6 +32,16 @@
   border-color: transparent;
   color: inherit;
 }
+.button--danger {
+  background: var(--danger-ink);
+  color: var(--surface);
+}
+a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
 .button--ghost:hover:not(:disabled) {
   background: rgb(127 127 127 / 12%);
 }
@@ -67,6 +77,10 @@
   font-size: 14px;
   color: var(--muted);
 }
+.field .input {
+  color: var(--ink);
+  font-size: 16px;
+}
 
 .panel {
   background: var(--surface);
@@ -88,6 +102,10 @@
   border-radius: var(--radius-md);
   background: var(--danger-bg);
   color: var(--danger-ink);
+}
+.notice--info {
+  background: var(--info-bg);
+  color: var(--ink);
 }
 .notice__close {
   background: none;

@@ -2,6 +2,8 @@
 @import './tokens.css';
 @import './base.css';
 @import './components.css';
+@import './shell.css';
+@import './page.css';
 @import './home.css';
 @import './table.css';
 @import './cards.css';
