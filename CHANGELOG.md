@@ -20,6 +20,14 @@ versions follow [SemVer](https://semver.org).
 ### Changed
 
 - Guest names replaced by accounts; the protocol is split per domain.
+- Documentation rewritten and checked against the code; new guides: getting started,
+  accounts, HTTP API.
+- The database defaults to `data/game.sqlite` at the repository root for every command.
+
+### Fixed
+
+- The Docker image installs every workspace package and ships the server's sources.
+- `compose.yaml` passes `ALERT_WEBHOOK_URL` to the app.
 
 ## [0.1.0] - 2026-10-24
 

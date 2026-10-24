@@ -59,7 +59,8 @@ function play(state: State, command: Extract<Command, { type: 'play' }>, ctx: Mo
   if (!canPlay(state, card))
     throw new RuleError('Follow the suit or the rank, or play an eight.', 'CANNOT_PLAY');
   const wild = isWild(card, state);
-  if (wild && !command.suit) throw new RuleError('Name a suit for your eight.', 'SUIT_REQUIRED');
+  if (wild && !command.suit)
+    throw new RuleError('Name a suit for your wild card.', 'SUIT_REQUIRED');
   state.discard.push(takeById(hand, card.id));
   if (wild) state.suit = command.suit!;
   else if (isStandard(card)) state.suit = card.suit;

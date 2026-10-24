@@ -1,7 +1,7 @@
 # @cardgame/engine
 
-Game-agnostic, pure kernel for turn-based card games: the `GameDefinition` contract, matches,
-seeded RNG, per-seat views, bots, simulation, replay and the conformance harness.
+The game-agnostic kernel: the `GameDefinition` contract, matches, seeded randomness, per-seat
+views, bots, simulation, replay, expansions and the conformance harness. It has no dependency
+and compiles without DOM or Node types.
 
-No dependencies, no DOM, no Node: it compiles with `types: []`. API reference:
-[docs/engine.md](../../docs/engine.md).
+Reference: [docs/engine.md](../../docs/engine.md).

@@ -1,136 +1,96 @@
-# Progression and profiles
+# Progression
 
-Members earn **experience (XP)** and **coins** from every finished online match, climb
-**levels**, complete **daily and weekly missions**, unlock **achievements** and move along the
-current **season**'s track. Profiles show it all to other members.
+Every finished match pays experience and coins. Experience raises a member's level and season
+track; matches also advance daily and weekly missions and unlock achievements. Profiles show
+it all to other members.
 
-| Where                                   | What                                                    |
-| --------------------------------------- | ------------------------------------------------------- |
-| `packages/meta/src/levels.ts`           | XP curve, level rewards                                 |
-| `packages/meta/src/rewards.ts`          | XP and coins for one result                             |
-| `packages/meta/src/stats.ts`            | The counters a match adds (`matches`, `log.play.8`…)    |
-| `packages/meta/src/missions.ts`         | Mission pools, periods, the daily draw                  |
-| `packages/meta/src/achievements.ts`     | Achievements and their one-time rewards                 |
-| `packages/meta/src/seasons.ts`          | Season dates and the season track                       |
-| `apps/server/src/features/progression/` | Listens to `match.finished`, pays, serves the endpoints |
-| `apps/server/src/features/profile/`     | Public profiles (read-only over progression's tables)   |
-| `apps/web/src/features/progression/`    | Missions panel, result panel, level bars, achievements  |
-| `apps/web/src/features/profile/`        | The profile screen                                      |
+## How it works
 
-Everything in `meta` is pure: the server decides with it, the client may display with it.
+**What a match pays** (`packages/meta/src/rewards.ts`). Each person still seated at the end
+earns:
 
-## After a match
+| Result | Experience                               | Coins |
+| ------ | ---------------------------------------- | ----- |
+| Loss   | 20, plus 5 per opponent beyond the first | 5     |
+| Win    | 50, plus 5 per opponent beyond the first | 20    |
 
-When a room announces `match.finished`, progression handles **each person still in their seat**
-(a seat a bot took over earns nothing) in **one transaction**:
+then multiplied by the table's kind — casual ×1, daily ×1.5, ranked ×2 — and halved at a table
+where the member was the only person (bots only). A casual win against one bot pays 25
+experience and 10 coins; a ranked win pays 100 and 40.
 
-1. A `match_results` row keyed by `room:seed:version`. If it already exists the event was
-   replayed: nothing else happens, so a duplicate event never pays twice.
-2. Coins for the match (`wallet.credit`, ref `reward:<key>`).
-3. The match's **tally** (`tallyMatch`) is added to the member's lifetime counters.
-4. XP goes to the level curve (each level crossed pays, ref `level:<n>`) and to the season of
-   the match's end (each step pays, ref `season:<season>:<step>`).
-5. Missions on at the match's end advance; newly reached achievements unlock and pay
-   (ref `achievement:<id>`).
-6. A summary of all this is stored with the row: `GET /api/progression/result/:room` returns
-   it, and the table's result panel shows it, then refreshes the wallet.
+A seat a bot took over earns nothing, and neither does a deleted account. Each match pays
+each member once, even if the result is announced twice: the match is identified by its table,
+seed and number of moves.
 
-All coins go through `services.wallet` with a unique `ref`, all items through
-`services.inventory.grant` (idempotent), so the whole chain can safely run again.
+**Levels** (`levels.ts`) go to 50. Level _n_ needs `100 + 25 × (n − 1)` experience to pass and
+pays `50 + 10 × n` coins on arrival. Levels 10, 25 and 50 also give an item: `felt-midnight`,
+`back-royal`, `back-gold`. Reaching level 10 takes 1,800 experience; level 50, 34,300.
 
-### Tallies
+**Seasons** (`seasons.ts`) last 56 days, counted from Monday 5 January 2026. Experience earned
+during a season also climbs its track: 30 steps of 300 experience, each paying 20 coins, the
+last one also `frame-silver`.
 
-A tally is a flat record of counters for one seat:
+**Missions** (`missions.ts`). Three daily and three weekly missions are active at a time, drawn
+from fixed pools by date, so everyone has the same ones. Days are UTC; weeks start on Monday. A
+completed mission is claimed by hand from the home page or the profile, and pays its coins and
+experience once.
 
-- `matches`, `wins`, and per kind `matches.daily`, `wins.ranked`…
-- `log.<event>` for each log entry of that seat (`log.play` = cards played, `log.draw`…), and
-  `log.<event>.<rank>` when the entry carries a card (`log.play.8` = eights played).
+| Daily pool               | Goal | Weekly pool              | Goal |
+| ------------------------ | ---- | ------------------------ | ---- |
+| Play matches             | 3    | Play matches             | 15   |
+| Win a match              | 1    | Win matches              | 7    |
+| Win matches              | 2    | Play eights              | 15   |
+| Play eights              | 3    | Play cards               | 150  |
+| Play cards               | 30   | Play ranked duels        | 3    |
+| Play the daily challenge | 1    | Play the daily challenge | 4    |
 
-It is derived from the game's own log, so a new game gets counters for its own events without
-touching progression. The engine keeps the last 200 log entries (`MAX_LOG`); counters of very
-long matches only see those.
+**Achievements** (`achievements.ts`) are permanent, each with a one-time coin reward: the first
+match and the first win; 50 and 250 matches; 10, 50 (`frame-silver`) and 200 (`frame-gold`)
+wins; 25 and 250 eights played; 7 daily challenges; 10 ranked wins; levels 10 and 25. They
+unlock after a match or a mission claim.
 
-## Rewards and levels
+**Statistics** (`stats.ts`). Missions and achievements never inspect matches themselves: a
+finished match is turned into counters (`matches`, `wins`, `matches.daily`, `wins.ranked`,
+`log.play`, `log.play.8`…) and they name the counter and the goal. New goals are data.
 
-`matchReward` pays `PLAY_XP` (+ `WIN_XP` for a win, + `EXTRA_OPPONENT_XP` per opponent beyond
-the first) and `PLAY_COINS` (+ `WIN_COINS`). The total is scaled by `KIND_PERCENT` (casual 100,
-daily 150, ranked 200) and by `BOTS_ONLY_PERCENT` (50) when no other person sat at the table.
+**Profiles** show a member's level, frame, statistics per kind of table, achievements and last
+ten matches. Your own profile adds your season and missions. Profiles are open to signed-in
+members, by handle: `/profile/ada-1234`.
 
-Levels run to `MAX_LEVEL` (50); going from level _n_ to _n + 1_ takes
-`XP_FIRST_LEVEL + XP_STEP × (n − 1)` XP. Reaching a level pays
-`LEVEL_COINS_BASE + n × LEVEL_COINS_PER_LEVEL` coins, plus an item from `LEVEL_ITEMS`.
+**After a match** a panel under the result shows what it earned: experience, levels gained,
+coins, missions advanced and achievements unlocked.
 
-## Missions
+## Data
 
-Each UTC day draws `MISSIONS_PER_PERIOD.daily` missions from the daily pool, and each week
-(from Monday) `MISSIONS_PER_PERIOD.weekly` from the weekly pool. The draw depends only on the
-date, so it is the same for everyone and nothing records which missions are on. Progress is
-stored per mission and period (`mission_progress`), so a new day simply starts at zero.
+| Table              | Holds                                           |
+| ------------------ | ----------------------------------------------- |
+| `progression`      | Each member's experience                        |
+| `season_xp`        | Experience per season                           |
+| `progress_stats`   | The counters                                    |
+| `match_results`    | One row per member and match, with what it paid |
+| `mission_progress` | Progress and claims per mission and period      |
+| `achievements`     | Unlocked achievements                           |
 
-A complete mission is **claimed** by the member (`POST /api/progression/missions/:id/claim`):
-it pays its coins (ref `mission:<id>:<period>`) and its XP, once. Rewards of a mission left
-unclaimed when its period ends are lost.
-
-### Adding a mission
-
-1. Append to `MISSIONS` in `packages/meta/src/missions.ts`:
-   `daily('daily-draw-10', 'log.draw', 10, 40, 20)` (id, counter, goal, XP, coins).
-2. Name it in `apps/web/src/features/progression/i18n.ts` under `missions.ids`, in every
-   language, with plural forms (`{count}` is the goal).
-3. `pnpm test` checks ids are unique and every mission is translated.
-
-Ids are permanent: progress rows reference them.
-
-## Achievements
-
-An achievement unlocks once, when a lifetime counter (or `level`) reaches its goal, and pays
-`reward.coins` and optionally `reward.item`.
-
-### Adding an achievement
-
-1. Append to `ACHIEVEMENTS` in `packages/meta/src/achievements.ts`:
-   `trophy('draws-100', 'log.draw', 100, 150)`.
-2. Add `name` and `text` under `achievements.ids` in the progression bundle, in every language.
-
-Members who already passed the goal unlock it with their next match.
-
-## Seasons
-
-Seasons are back-to-back ranges of `SEASON_DAYS` (56) days from `SEASON_EPOCH`. XP earned during
-a season also fills that season's track: one step per `SEASON_XP_PER_LEVEL`, up to
-`SEASON_MAX_LEVEL`, each paying `SEASON_LEVEL_COINS` (and an item from `SEASON_ITEMS`). The
-track starts from zero each season; the level curve does not.
-
-## Endpoints
-
-| Method | Path                                  | Answer                                         |
-| ------ | ------------------------------------- | ---------------------------------------------- |
-| GET    | `/api/progression`                    | Level, missions, achievements, season          |
-| POST   | `/api/progression/missions/:id/claim` | Coins and XP paid, and the new progression     |
-| GET    | `/api/progression/result/:room`       | What the member's last match there earned      |
-| GET    | `/api/profile`                        | The member's own profile                       |
-| GET    | `/api/profile/:handle`                | A member's profile (`ada-1234` for `ada#1234`) |
-
-Errors: `MISSION_UNAVAILABLE` (404), `MISSION_INCOMPLETE` and `MISSION_CLAIMED` (409),
-`PROFILE_NOT_FOUND` (404).
-
-## Tables
-
-| Table              | Holds                                                         |
-| ------------------ | ------------------------------------------------------------- |
-| `progression`      | Total XP per member                                           |
-| `season_xp`        | XP per member and season                                      |
-| `progress_stats`   | Lifetime counters (tallies summed; `level` keeps the highest) |
-| `match_results`    | One row per member and match, with the stored summary         |
-| `mission_progress` | Progress and claim time per member, mission and period        |
-| `achievements`     | Unlock time per member and achievement                        |
-
-All reference `accounts(id) ON DELETE CASCADE` and are in the account export.
+All are deleted with the account and included in its export.
 
 ## Tuning
 
-Every number is a named constant in `packages/meta/src`. To make progress faster, raise the
-reward constants rather than lowering the curve: past levels are computed from total XP, so
-changing `XP_FIRST_LEVEL` or `XP_STEP` moves every member's level (rewards already paid stay
-paid, and refs keep a level from paying twice). Run `pnpm exec vitest run packages/meta` after
-a change: the tests pin the curve's shape and check every item id against the catalog.
+| What                                  | Where                               |
+| ------------------------------------- | ----------------------------------- |
+| Match rewards and multipliers         | `packages/meta/src/rewards.ts`      |
+| Level curve and level rewards         | `packages/meta/src/levels.ts`       |
+| Mission pools and how many are active | `packages/meta/src/missions.ts`     |
+| Achievements                          | `packages/meta/src/achievements.ts` |
+| Season length and track               | `packages/meta/src/seasons.ts`      |
+
+## Extending
+
+- **A mission or an achievement**: add it to its list with a new permanent id, a counter and a
+  goal, then its name in every language in `apps/web/src/features/progression/i18n.ts`
+  (`missions.ids.<id>`, `achievements.ids.<id>`). A test checks every id has a translation.
+- **A new counter**: derive it in `stats.ts` from the finished match; anything in the game's log
+  can become one.
+- **Your own game**: the counters named after Crazy Eights (`log.play.8`, eights played) need
+  replacing with your game's events.
+
+Endpoints: [HTTP API](api.md#progression-and-profiles).

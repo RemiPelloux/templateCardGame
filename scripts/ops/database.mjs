@@ -6,9 +6,11 @@ import { resolve } from 'node:path';
 const require = createRequire(resolve(import.meta.dirname, '../../apps/server/package.json'));
 const Database = require('better-sqlite3');
 
-/** The database at DB_PATH (default data/game.sqlite, from the current directory). */
+/** The database at DB_PATH, by default the server's own: data/game.sqlite at the repository root. */
 export function openReadOnly() {
-  const path = resolve(process.env.DB_PATH ?? 'data/game.sqlite');
+  const path = resolve(
+    process.env.DB_PATH ?? resolve(import.meta.dirname, '../../data/game.sqlite'),
+  );
   return { path, db: new Database(path, { readonly: true, fileMustExist: true }) };
 }
 

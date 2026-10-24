@@ -11,6 +11,8 @@ RUN apt-get update \
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/engine/package.json packages/engine/
 COPY packages/game/package.json packages/game/
+COPY packages/i18n/package.json packages/i18n/
+COPY packages/meta/package.json packages/meta/
 COPY packages/protocol/package.json packages/protocol/
 COPY apps/server/package.json apps/server/
 COPY apps/web/package.json apps/web/
@@ -21,8 +23,8 @@ FROM deps AS build
 COPY . .
 RUN pnpm build
 
-# Only the server's production dependencies (and the shared packages it imports).
-FROM deps AS server-deps
+# The server's sources and production dependencies, with the shared packages it imports.
+FROM build AS server-deps
 RUN pnpm --filter @cardgame/server deploy --prod --legacy /server
 
 FROM ${NODE_IMAGE} AS runtime

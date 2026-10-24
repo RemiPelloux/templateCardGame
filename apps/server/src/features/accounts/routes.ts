@@ -89,7 +89,7 @@ export function accountRoutes(router: Router, { accounts, config, limit }: Servi
     .on('POST', accountApi.recoveryCodes, async ({ me, body }) => ({
       codes: await accounts.regenerateCodes(me().id, (await body()).password),
     }))
-    .on('DELETE', accountApi.session_(':id'), ({ me, params }) => {
+    .on('DELETE', accountApi.deviceSession(':id'), ({ me, params }) => {
       accounts.sessions.revokeById(me().id, params[0] ?? '');
     })
     .on('POST', accountApi.deleteAccount, async ({ res, me, body }) => {

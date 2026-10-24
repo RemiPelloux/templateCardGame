@@ -41,7 +41,6 @@ export const accountApi = {
   password: '/api/account/password',
   locale: '/api/account/locale',
   recoveryCodes: '/api/account/recovery-codes',
-  sessions: '/api/account/sessions',
-  session_: (id: string) => `/api/account/sessions/${id}`,
+  deviceSession: (id: string) => `/api/account/sessions/${id}`,
   export: '/api/account/export',
 } as const;
