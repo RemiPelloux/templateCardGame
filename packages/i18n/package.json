@@ -1,0 +1,13 @@
+{
+  "name": "@cardgame/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Typed translations: locales, message catalogs, plurals, interpolation, formatting.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc -p tsconfig.json"
+  }
+}
