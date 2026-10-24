@@ -93,13 +93,13 @@ pub/sub, Postgres `LISTEN/NOTIFY`).
 
 Where the features left out of the template would plug in:
 
-| Feature                  | Where                                                                      |
-| ------------------------ | -------------------------------------------------------------------------- |
-| Accounts and passwords   | Replace `identity/sessions.ts`; routes only need a `Player`                |
-| Turn clock / AFK         | A deadline on `Room` checked in `RoomService.tick`, then `playBot`         |
-| Rankings / Elo           | Read the `matches` archive; compute in a new `server/src/ranking`          |
-| Several games in one app | A registry of definitions keyed by `match.game`, picked in the lobby       |
-| Spectators               | `roomView` already projects with `seat = null`; allow it in `view`         |
-| Simultaneous turns       | Return several seats from `actors`; the engine and bots handle it          |
-| Translations             | Log entries are `{ event, data }`; translate in `web/src/game/describe.ts` |
-| PWA / offline install    | Add `vite-plugin-pwa`; practice already works without the server           |
+| Feature                  | Where                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| Accounts and passwords   | Replace `identity/sessions.ts`; routes only need a `Player`                   |
+| Turn clock / AFK         | A deadline on `Room` checked in `RoomService.tick`, then `playBot`            |
+| Rankings / Elo           | Built in: daily challenge and ranked duels, see [competitive](competitive.md) |
+| Several games in one app | A registry of definitions keyed by `match.game`, picked in the lobby          |
+| Spectators               | `roomView` already projects with `seat = null`; allow it in `view`            |
+| Simultaneous turns       | Return several seats from `actors`; the engine and bots handle it             |
+| Translations             | Log entries are `{ event, data }`; translate in `web/src/game/describe.ts`    |
+| PWA / offline install    | Add `vite-plugin-pwa`; practice already works without the server              |

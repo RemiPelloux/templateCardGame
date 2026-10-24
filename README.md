@@ -80,6 +80,7 @@ More in [architecture](docs/architecture.md).
 | [Engine](docs/engine.md)                     | The `GameDefinition` contract and the engine API      |
 | [Making a game](docs/making-a-game.md)       | Step-by-step derivation, with checklist               |
 | [Multiplayer](docs/multiplayer.md)           | Rooms, revisions, live events, bots, HTTP endpoints   |
+| [Competitive](docs/competitive.md)           | Daily challenge, rankings, Elo and matchmaking        |
 | [Testing](docs/testing.md)                   | Unit, conformance, HTTP, browser tests and simulation |
 | [Design](docs/design.md)                     | Tokens, theming, components, accessibility            |
 | [Deployment](docs/deployment.md)             | Configuration, Docker, Caddy, backups                 |
