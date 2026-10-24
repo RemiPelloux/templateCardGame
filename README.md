@@ -5,22 +5,31 @@ Write your rules once as a pure `GameDefinition`; the template already provides 
 
 - **Engine**: deals matches, applies commands, hides private cards per seat, drives bots,
   simulates thousands of games, and replays any match exactly from its seed.
-- **Server**: authoritative rooms with live updates (Server-Sent Events), bot seats, guest
-  sessions, SQLite persistence that survives restarts, and a hardened HTTP layer.
-- **Web client**: React 19 home, lobby and table, plus offline practice against bots.
+- **Expansions (DLC)**: a registry of expansions with versioned rules, ownership and hooks into
+  the base game; `pnpm new:expansion` scaffolds one. Ships with _Jokers & Tricks_.
+- **Server**: authoritative rooms with live updates (Server-Sent Events), bot seats, SQLite
+  persistence that survives restarts, and a hardened HTTP layer, organised as feature modules.
+- **Platform**: accounts with passwords and recovery codes; profiles, XP, levels, missions,
+  achievements and seasons; a coin shop, boosters and a collection of cosmetics; friends,
+  presence, table invites, blocks and reports; a daily challenge; ranked duels with Elo.
+- **Web client**: React 19, installable as a PWA, in **English and French** with typed
+  translations: adding a language is one line plus the translations the compiler asks for.
+- **Operations**: anonymous field telemetry, a server error log with alerts, Docker and Caddy.
 - **Quality**: strict TypeScript, a conformance harness that fuzzes your rules, unit, HTTP and
-  browser tests, enforced layer boundaries, CI, and a Docker image.
+  browser tests, enforced layer boundaries and CI.
 
 It ships with **Crazy Eights** as a complete, tested example. Replace it with your game.
 
 ```text
 packages/
-  engine/     @cardgame/engine    Game-agnostic kernel. Pure: no DOM, no Node, no I/O.
-  game/       @cardgame/game      YOUR RULES. Crazy Eights today: setup, commands, views, bots.
+  engine/     @cardgame/engine    Game-agnostic kernel: matches, views, bots, expansions. Pure.
+  game/       @cardgame/game      YOUR RULES. Crazy Eights + its expansions: setup, commands, bots.
+  meta/       @cardgame/meta      The metagame as pure data: items, levels, missions, boosters, Elo.
+  i18n/       @cardgame/i18n      Typed translations, plurals and formatting. No dependency.
   protocol/   @cardgame/protocol  The wire contract between the server and its clients.
 apps/
-  server/     @cardgame/server    Node HTTP server: sessions, rooms, bots, live events, SQLite.
-  web/        @cardgame/web       React client: home, lobby, table, offline practice.
+  server/     @cardgame/server    Node server: one folder per feature under src/features/.
+  web/        @cardgame/web       React client: one folder per feature under src/features/.
 docs/                             Architecture, engine API, guides.
 scripts/                          Boundary check, bot simulator, project rename.
 ```
@@ -79,10 +88,18 @@ More in [architecture](docs/architecture.md).
 | [Architecture](docs/architecture.md)         | Layers, data flow, authority, privacy, boundaries     |
 | [Engine](docs/engine.md)                     | The `GameDefinition` contract and the engine API      |
 | [Making a game](docs/making-a-game.md)       | Step-by-step derivation, with checklist               |
+| [Expansions](docs/making-an-expansion.md)    | DLC: extra cards and rules, ownership, scaffolding    |
+| [Adding a feature](docs/features.md)         | Server modules, events, web folders, registries       |
+| [Translations](docs/i18n.md)                 | How text is translated, adding a language             |
 | [Multiplayer](docs/multiplayer.md)           | Rooms, revisions, live events, bots, HTTP endpoints   |
+| [Progression](docs/progression.md)           | XP, levels, missions, achievements, seasons, profiles |
+| [Social](docs/social.md)                     | Friends, presence, invites, blocks, reports           |
+| [Competitive](docs/competitive.md)           | Daily challenge, rankings, Elo and matchmaking        |
 | [Testing](docs/testing.md)                   | Unit, conformance, HTTP, browser tests and simulation |
 | [Design](docs/design.md)                     | Tokens, theming, components, accessibility            |
+| [Economy](docs/economy.md)                   | Coins, items, boosters, the shop, tuning              |
 | [Deployment](docs/deployment.md)             | Configuration, Docker, Caddy, backups                 |
+| [Operations](docs/operations.md)             | Telemetry, error log, alerts, PWA updates and icons   |
 | [Crazy Eights rules](packages/game/RULES.md) | The example game, as a rules-document template        |
 
 ## Scripts
@@ -99,6 +116,8 @@ More in [architecture](docs/architecture.md).
 | `pnpm sim`             | Bot-vs-bot statistics: `pnpm sim --games 1000 --players 4`  |
 | `pnpm verify`          | Everything CI checks, in order                              |
 | `pnpm rename`          | Rename the template to your project                         |
+| `pnpm icons`           | Draw the app icons (PWA, Apple) from the favicon            |
+| `pnpm new:expansion`   | Scaffold an expansion (DLC) and register it                 |
 
 ## Origin
 

@@ -33,6 +33,12 @@
   --card-back: #7c2d12;
   --card-back-pattern: #9a3412;
 
+  /* Rarity of items and boosters: always shown with its name too, never by colour alone. */
+  --rarity-common: #5b6660;
+  --rarity-rare: #2563eb;
+  --rarity-epic: #9333ea;
+  --rarity-legendary: #975a16;
+
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 22px;
@@ -74,6 +80,10 @@
     --felt: #164d33;
     --felt-deep: #0c2f1f;
     --card-face: #f6f2e8;
+    --rarity-common: #a3ada6;
+    --rarity-rare: #60a5fa;
+    --rarity-epic: #c084fc;
+    --rarity-legendary: #facc15;
     --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
     --shadow-2: 0 8px 24px rgb(0 0 0 / 50%);
   }

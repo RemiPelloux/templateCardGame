@@ -1,5 +1,10 @@
 import { readInteger, readOneOf, readOptional, readRecord, readString } from '@cardgame/engine';
-import type { CommandRequest, SeatsRequest, StartRequest } from '@cardgame/protocol';
+import type {
+  CommandRequest,
+  OptionsRequest,
+  SeatsRequest,
+  StartRequest,
+} from '@cardgame/protocol';
 import type { Command } from '@cardgame/game';
 
 /** Readers for request bodies: shapes only. The game validates commands and options itself. */
@@ -18,6 +23,10 @@ export function seatsRequest(body: Record<string, unknown>): SeatsRequest {
 export function startRequest(body: Record<string, unknown>): StartRequest {
   const options = readOptional(body.options, (v) => readRecord(v, 'options'));
   return options ? { options } : {};
+}
+
+export function optionsRequest(body: Record<string, unknown>): OptionsRequest {
+  return { options: readRecord(body.options, 'options') };
 }
 
 /** The command stays untrusted here: `act` hands it to the game's own parseCommand. */

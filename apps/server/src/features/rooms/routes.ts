@@ -1,7 +1,7 @@
 import { normalizeRoomCode, roomApi, type Player } from '@cardgame/protocol';
 import type { Services } from '../../core/feature';
 import { STREAMING, type Router } from '../../core/http/router';
-import { commandRequest, seatsRequest, startRequest } from './requests';
+import { commandRequest, optionsRequest, seatsRequest, startRequest } from './requests';
 import { streamRoom } from './room-events';
 
 /** Writes per minute and member: plenty for play, a ceiling for scripts. */
@@ -27,6 +27,9 @@ export function roomRoutes(router: Router, { rooms, limit, config }: Services) {
     })
     .on('POST', roomApi.seats(':code'), async ({ params, me, body }) =>
       rooms.seats(code(params), writer(me), seatsRequest(await body())),
+    )
+    .on('POST', roomApi.options(':code'), async ({ params, me, body }) =>
+      rooms.setOptions(code(params), writer(me), optionsRequest(await body())),
     )
     .on('POST', roomApi.start(':code'), async ({ params, me, body }) =>
       rooms.start(code(params), writer(me), startRequest(await body())),

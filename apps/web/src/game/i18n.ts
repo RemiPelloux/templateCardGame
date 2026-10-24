@@ -16,6 +16,7 @@ export const game = defineBundle({
     suitToFollow: 'Suit to follow: {suit}',
     prompt: {
       yourMove: 'Your move: follow {glyph} {suit} or a {rank}, or play an eight.',
+      yourMoveSuit: 'Your move: follow {glyph} {suit}, or play an eight.',
       waiting: 'Waiting for {name}…',
       over: 'The match is over.',
     },
@@ -32,6 +33,11 @@ export const game = defineBundle({
       drew: 'You drew the {card}.',
       pass: '{name} passes.',
       reshuffle: 'The discard pile is shuffled back into the deck.',
+      forcedDraw: {
+        one: '{name} must draw {count} card.',
+        other: '{name} must draw {count} cards.',
+      },
+      skip: '{name} misses a turn.',
     },
     outcome: {
       EMPTY_HAND: 'Every card played! The winner scores the points left in the other hands.',
@@ -80,6 +86,7 @@ export const game = defineBundle({
     suitToFollow: 'Couleur à suivre : {suit}',
     prompt: {
       yourMove: 'À vous : suivez {glyph} {suit} ou un {rank}, ou jouez un huit.',
+      yourMoveSuit: 'À vous : suivez {glyph} {suit}, ou jouez un huit.',
       waiting: 'En attente de {name}…',
       over: 'La partie est terminée.',
     },
@@ -100,6 +107,11 @@ export const game = defineBundle({
       drew: 'Vous avez pioché le {card}.',
       pass: '{name} passe.',
       reshuffle: 'La défausse est remélangée dans la pioche.',
+      forcedDraw: {
+        one: '{name} doit piocher {count} carte.',
+        other: '{name} doit piocher {count} cartes.',
+      },
+      skip: '{name} passe son tour.',
     },
     outcome: {
       EMPTY_HAND:

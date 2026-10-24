@@ -1,7 +1,9 @@
-import type { PlayingCard as Card, Suit } from '@cardgame/engine';
+import type { PlayingCard as StandardCard, Suit } from '@cardgame/engine';
+import { isStandard, type Card } from '@cardgame/game';
 import { useT } from '../i18n/I18nProvider';
 import type { Translate } from '@cardgame/i18n';
 import type { AppMessages } from '../i18n/messages';
+import { specialCardUi } from './expansions';
 
 export const SUIT_GLYPH: Record<Suit, string> = {
   clubs: '♣',
@@ -14,8 +16,9 @@ export const isRed = (suit: Suit) => suit === 'hearts' || suit === 'diamonds';
 const NAMED_RANKS = ['A', 'J', 'Q', 'K'] as const;
 type NamedRank = (typeof NAMED_RANKS)[number];
 
-/** “Queen of Hearts” / « Dame de Cœur ». */
+/** “Queen of Hearts” / « Dame de Cœur »; an expansion names its own cards (“Joker”). */
 export function cardLabel(card: Card, t: Translate<AppMessages>) {
+  if (!isStandard(card)) return specialCardUi(card)?.label(t) ?? card.id;
   const rank = NAMED_RANKS.includes(card.rank as NamedRank)
     ? t(`game.ranks.${card.rank as NamedRank}`)
     : card.rank;
@@ -29,10 +32,7 @@ type Props = {
   onSelect?: (card: Card) => void;
 };
 
-/** A face-up card of the standard deck. Custom decks swap this component for their own. */
-export function PlayingCard({ card, state = 'idle', onSelect }: Props) {
-  const t = useT();
-  const label = cardLabel(card, t);
+function StandardFace({ card }: { card: StandardCard }) {
   const corner = (
     <>
       {card.rank}
@@ -40,7 +40,7 @@ export function PlayingCard({ card, state = 'idle', onSelect }: Props) {
       {SUIT_GLYPH[card.suit]}
     </>
   );
-  const face = (
+  return (
     <>
       <span className="card__corner" aria-hidden>
         {corner}
@@ -53,7 +53,24 @@ export function PlayingCard({ card, state = 'idle', onSelect }: Props) {
       </span>
     </>
   );
-  const className = `card card--${state} ${isRed(card.suit) ? 'card--red' : ''}`;
+}
+
+/** The face of any card: the standard deck's, or the one its expansion draws. */
+function Face({ card }: { card: Card }) {
+  if (isStandard(card)) return <StandardFace card={card} />;
+  const Special = specialCardUi(card)?.Face;
+  return Special ? <Special /> : null;
+}
+
+const toneOf = (card: Card) =>
+  !isStandard(card) ? `card--special card--${card.special}` : isRed(card.suit) ? 'card--red' : '';
+
+/** A face-up card. Custom decks swap this component for their own. */
+export function PlayingCard({ card, state = 'idle', onSelect }: Props) {
+  const t = useT();
+  const label = cardLabel(card, t);
+  const face = <Face card={card} />;
+  const className = `card card--${state} ${toneOf(card)}`;
   if (!onSelect)
     return (
       <div className={className} role="img" aria-label={label}>

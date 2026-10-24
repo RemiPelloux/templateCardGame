@@ -10,6 +10,8 @@ export type MatchController = {
   /** Seat names, in seat order. */
   names: string[];
   bots: boolean[];
+  /** Each seat's equipped frame (an item id), ringed around its avatar; absent offline. */
+  frames?: (string | undefined)[];
   send(command: Command): void;
   /** A command is on its way. */
   busy: boolean;

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { economyApi, type Route, type WalletView } from '@cardgame/protocol';
 import { useSession } from '../features/account/useSession';
+import { FriendsBadge, PresencePing } from '../features/friends/FriendsBadge';
 import { useT } from '../i18n/I18nProvider';
 import { http } from '../net/http';
 import { Link } from './Link';
@@ -43,6 +44,7 @@ function Header({ route }: { route: Route }) {
             aria-current={route.name === item.route ? 'page' : undefined}
           >
             {t(item.label)}
+            {item.route === 'friends' && <FriendsBadge />}
           </Link>
         ))}
       </nav>
@@ -83,6 +85,7 @@ function TabBar({ route }: { route: Route }) {
             {item.icon}
           </span>
           {t(item.label)}
+          {item.route === 'friends' && <FriendsBadge />}
         </Link>
       ))}
     </nav>
@@ -94,6 +97,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
   const immersive = IMMERSIVE.has(route.name);
   return (
     <div className={`shell ${immersive ? 'shell--immersive' : ''}`}>
+      <PresencePing />
       {!immersive && <Header route={route} />}
       {children}
       {!immersive && <TabBar route={route} />}

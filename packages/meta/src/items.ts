@@ -55,6 +55,12 @@ export const ITEMS: readonly Item[] = [
     look: { base: '#713f12', stripe: '#eab308' },
   },
   {
+    id: 'back-sunset',
+    kind: 'cardBack',
+    rarity: 'rare',
+    look: { base: '#9d174d', stripe: '#ea580c' },
+  },
+  {
     id: 'felt-green',
     kind: 'felt',
     rarity: 'common',
@@ -77,6 +83,13 @@ export const ITEMS: readonly Item[] = [
   },
   { id: 'felt-midnight', kind: 'felt', rarity: 'epic', look: { felt: '#1e1b4b', deep: '#0b0a24' } },
   {
+    id: 'felt-teal',
+    kind: 'felt',
+    rarity: 'common',
+    price: 180,
+    look: { felt: '#115e59', deep: '#083b38' },
+  },
+  {
     id: 'frame-none',
     kind: 'frame',
     rarity: 'common',
@@ -85,6 +98,10 @@ export const ITEMS: readonly Item[] = [
   },
   { id: 'frame-silver', kind: 'frame', rarity: 'rare', price: 300, look: { ring: '#94a3b8' } },
   { id: 'frame-gold', kind: 'frame', rarity: 'legendary', look: { ring: '#eab308' } },
+  { id: 'frame-bronze', kind: 'frame', rarity: 'common', price: 120, look: { ring: '#b45309' } },
+  { id: 'frame-ruby', kind: 'frame', rarity: 'epic', look: { ring: '#e11d48' } },
+  /** Unlocks the expansion of the same name for the tables its owner hosts (packages/game). */
+  { id: 'expansion-jokers', kind: 'expansion', rarity: 'epic', price: 800 },
 ];
 
 const byId = new Map(ITEMS.map((item) => [item.id, item]));
