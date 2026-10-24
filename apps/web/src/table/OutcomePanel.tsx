@@ -1,9 +1,16 @@
+import type { ReactNode } from 'react';
 import { gameUi } from '../game';
 import { useT } from '../i18n/I18nProvider';
 import { Button } from '../ui/Button';
 import type { MatchController } from './controller';
 
-export function OutcomePanel({ controller }: { controller: MatchController }) {
+export function OutcomePanel({
+  controller,
+  children,
+}: {
+  controller: MatchController;
+  children?: ReactNode;
+}) {
   const t = useT();
   const { outcome, you } = controller.view;
   if (!outcome) return null;
@@ -28,6 +35,7 @@ export function OutcomePanel({ controller }: { controller: MatchController }) {
           ))}
         </ol>
       )}
+      {children}
       {controller.rematch && (
         <Button onClick={controller.rematch}>{t('table.outcome.again')}</Button>
       )}

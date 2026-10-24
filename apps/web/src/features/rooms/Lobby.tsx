@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { RoomView } from '@cardgame/protocol';
 import { useT } from '../../i18n/I18nProvider';
 import { Button } from '../../ui/Button';
+import { LOBBY_PANELS } from './slots';
 import type { RoomHandle } from './useRoom';
 
 const COPIED_MS = 1500;
@@ -80,6 +81,9 @@ export function Lobby({ room, handle }: { room: RoomView; handle: RoomHandle }) 
       )}
       {!isHost && you !== null && <p className="muted">{t('rooms.waitingHost')}</p>}
       {!ready && <p className="muted">{t('rooms.needPlayers', { count: limits.minSeats })}</p>}
+      {LOBBY_PANELS.map((Panel, i) => (
+        <Panel key={i} room={room} handle={handle} />
+      ))}
     </section>
   );
 }

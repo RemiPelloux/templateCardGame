@@ -46,13 +46,21 @@ function initialLocale(): Locale {
     : negotiateLocale(navigator.languages ?? []);
 }
 
-/** Looks the code up in the game's errors first, then the app's, then keeps the server's text. */
+/**
+ * Looks the code up in the game's errors, then every feature's `errors` (a feature translates
+ * the codes it throws in its own bundle), then the app's; else keeps the server's text.
+ */
 function errorTextFor(locale: Locale, t: Translate<AppMessages>) {
   const catalog = messages[locale];
+  const namespaces = [
+    'game',
+    ...Object.keys(catalog).filter((n) => n !== 'game' && n !== 'common'),
+    'common',
+  ];
   return (error: unknown) => {
     const code = error instanceof RequestError || isRuleError(error) ? error.code : 'UNKNOWN';
     const params = (error as { params?: Record<string, string | number> }).params;
-    for (const key of [`game.errors.${code}`, `common.errors.${code}`])
+    for (const key of namespaces.map((n) => `${n}.errors.${code}`))
       if (hasMessage(catalog, key)) return t(key as Parameters<typeof t>[0], params);
     return error instanceof Error && error.message ? error.message : t('common.errors.UNKNOWN');
   };

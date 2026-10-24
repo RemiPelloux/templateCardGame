@@ -6,10 +6,16 @@ import { GameLog } from './GameLog';
 import { OutcomePanel } from './OutcomePanel';
 import { Seats } from './Seats';
 
-type Props = { controller: MatchController; title: string; actions?: ReactNode };
+type Props = {
+  controller: MatchController;
+  title: string;
+  actions?: ReactNode;
+  /** Shown under the result once the match is over (rewards, rating changes). */
+  outcomeExtra?: ReactNode;
+};
 
 /** The generic table: seats on top, the game's board on the felt, the log alongside. */
-export function Table({ controller, title, actions }: Props) {
+export function Table({ controller, title, actions, outcomeExtra }: Props) {
   const { Board } = gameUi;
   return (
     <div className="table">
@@ -20,7 +26,7 @@ export function Table({ controller, title, actions }: Props) {
       <Seats controller={controller} />
       <main className="table__felt">
         <Notice message={controller.error} onDismiss={controller.dismissError} />
-        <OutcomePanel controller={controller} />
+        <OutcomePanel controller={controller}>{outcomeExtra}</OutcomePanel>
         <Board controller={controller} />
       </main>
       <GameLog controller={controller} />
