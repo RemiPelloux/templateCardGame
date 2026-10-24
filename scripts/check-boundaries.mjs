@@ -2,11 +2,11 @@
 /**
  * Keeps the layers honest. Each folder may only import what the architecture allows:
  *
- *   engine   → nothing (pure kernel)
- *   game     → engine
- *   protocol → engine, game
- *   server   → engine, game, protocol, Node
- *   web      → engine, game, protocol, React (never the server, never Node)
+ *   engine, i18n → nothing (pure kernels)
+ *   game, meta   → engine
+ *   protocol     → engine, game, i18n, meta
+ *   server       → engine, game, i18n, meta, protocol, Node
+ *   web          → engine, game, i18n, meta, protocol, React (never the server, never Node)
  *
  * Run by `pnpm lint:boundaries` and in CI. Exits 1 and lists every violation.
  */
@@ -17,25 +17,30 @@ const root = new URL('..', import.meta.url).pathname;
 const IMPORT =
   /(?:import|export)\s[^'"]*?from\s+['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
 
+const SHARED = [
+  '@cardgame/engine',
+  '@cardgame/game',
+  '@cardgame/i18n',
+  '@cardgame/meta',
+  '@cardgame/protocol',
+];
+
 const RULES = [
   { dir: 'packages/engine/src', allow: [] },
+  { dir: 'packages/i18n/src', allow: [] },
   { dir: 'packages/game/src', allow: ['@cardgame/engine'] },
-  { dir: 'packages/protocol/src', allow: ['@cardgame/engine', '@cardgame/game'] },
+  { dir: 'packages/meta/src', allow: ['@cardgame/engine'] },
+  {
+    dir: 'packages/protocol/src',
+    allow: [...SHARED.slice(0, 2), '@cardgame/i18n', '@cardgame/meta'],
+  },
   {
     dir: 'apps/server/src',
-    allow: [
-      '@cardgame/engine',
-      '@cardgame/game',
-      '@cardgame/protocol',
-      'node:',
-      'better-sqlite3',
-      'sirv',
-      'vite',
-    ],
+    allow: [...SHARED, 'node:', 'better-sqlite3', 'sirv', 'vite'],
   },
   {
     dir: 'apps/web/src',
-    allow: ['@cardgame/engine', '@cardgame/game', '@cardgame/protocol', 'react', 'react-dom'],
+    allow: [...SHARED, 'react', 'react-dom', '@tanstack/react-query'],
   },
 ];
 
