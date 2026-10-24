@@ -102,4 +102,4 @@ Where the features left out of the template would plug in:
 | Spectators               | `roomView` already projects with `seat = null`; allow it in `view`         |
 | Simultaneous turns       | Return several seats from `actors`; the engine and bots handle it          |
 | Translations             | Log entries are `{ event, data }`; translate in `web/src/game/describe.ts` |
-| PWA / offline install    | Add `vite-plugin-pwa`; practice already works without the server           |
+| PWA / offline install    | Built in; see [operations](operations.md#installable-app-pwa)              |

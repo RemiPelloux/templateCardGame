@@ -4,14 +4,15 @@
 
 Read once at start-up by `apps/server/src/config.ts`:
 
-| Variable        | Default            | Meaning                                                   |
-| --------------- | ------------------ | --------------------------------------------------------- |
-| `PORT` / `HOST` | `3000` / `0.0.0.0` | Where the server listens                                  |
-| `DB_PATH`       | `data/game.sqlite` | SQLite file; `:memory:` keeps nothing                     |
-| `STATIC_DIR`    | `apps/web/dist`    | The built web app                                         |
-| `PUBLIC_ORIGIN` |                    | Exact `https://` origin; **required** in production       |
-| `TRUST_PROXY`   |                    | `1` only behind a private proxy that sets X-Forwarded-For |
-| `LOG_REQUESTS`  | on                 | `0` silences the per-request JSON lines                   |
+| Variable            | Default            | Meaning                                                                                         |
+| ------------------- | ------------------ | ----------------------------------------------------------------------------------------------- |
+| `PORT` / `HOST`     | `3000` / `0.0.0.0` | Where the server listens                                                                        |
+| `DB_PATH`           | `data/game.sqlite` | SQLite file; `:memory:` keeps nothing                                                           |
+| `STATIC_DIR`        | `apps/web/dist`    | The built web app                                                                               |
+| `PUBLIC_ORIGIN`     |                    | Exact `https://` origin; **required** in production                                             |
+| `TRUST_PROXY`       |                    | `1` only behind a private proxy that sets X-Forwarded-For                                       |
+| `LOG_REQUESTS`      | on                 | `0` silences the per-request JSON lines                                                         |
+| `ALERT_WEBHOOK_URL` |                    | ntfy, Discord or Slack webhook told about server errors; see [operations](operations.md#alerts) |
 
 With `NODE_ENV=production` the server refuses to start without a valid `PUBLIC_ORIGIN`, and
 session cookies are marked `Secure`.

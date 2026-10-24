@@ -9,6 +9,7 @@ Start with [architecture](architecture.md), then [making a game](making-a-game.m
 - [Testing](testing.md): what each test layer proves and how to run it
 - [Design](design.md): tokens, light and dark themes, components, accessibility
 - [Deployment](deployment.md): configuration, Docker and Caddy, data and backups
+- [Operations](operations.md): field telemetry and privacy, error log, alerts, PWA updates and icons
 - [Example rules](../packages/game/RULES.md): Crazy Eights, written as a rules template
 
 Conventions for changes are in [CONTRIBUTING](../CONTRIBUTING.md).
