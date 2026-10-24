@@ -120,7 +120,7 @@ function SessionsSection({ overview }: { overview: AccountOverview }) {
   const client = useQueryClient();
   const revoke = (id: string) =>
     http
-      .delete(accountApi.session_(id))
+      .delete(accountApi.deviceSession(id))
       .then(() => client.invalidateQueries({ queryKey: keys.account }));
   return (
     <section className="panel">
