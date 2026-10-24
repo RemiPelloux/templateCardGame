@@ -1,0 +1,16 @@
+{
+  "name": "@cardgame/game",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The game's rules as a GameDefinition. Ships with Crazy Eights as the worked example: replace it with yours.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@cardgame/engine": "workspace:*"
+  }
+}

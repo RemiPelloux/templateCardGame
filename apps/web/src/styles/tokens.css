@@ -1,0 +1,82 @@
+/*
+ * Design tokens: every colour, size and duration the app uses. Rebrand the template here;
+ * components only ever reference these variables.
+ */
+:root {
+  --font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: ui-serif, 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+
+  --ink: #1d2320;
+  --muted: #5b6660;
+  --canvas: #f4f1ea;
+  --surface: #fffdf8;
+  --line: #ddd6c8;
+  --accent: #c2410c;
+  --accent-hover: #9a3412;
+  --accent-ink: #ffffff;
+  --focus: #2563eb;
+  --danger-bg: #fde8e4;
+  --danger-ink: #8a1c0f;
+  --online: #22a35a;
+
+  --felt: #1f6b45;
+  --felt-deep: #134a2f;
+  --felt-ink: #f1f7f2;
+  --felt-muted: #b7d3c2;
+
+  --card-face: #fffdf7;
+  --card-edge: #d8d2c4;
+  --card-black: #1d2320;
+  --card-red: #c0261b;
+  --card-back: #7c2d12;
+  --card-back-pattern: #9a3412;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --control-height: 44px;
+  --page-max: 1100px;
+
+  --card-width: clamp(58px, 9vw, 92px);
+  --card-ratio: 1.4;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 8%), 0 2px 8px rgb(0 0 0 / 6%);
+  --shadow-2: 0 8px 24px rgb(0 0 0 / 18%);
+  --motion-fast: 140ms;
+  --motion-medium: 240ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #ecefe9;
+    --muted: #a3ada6;
+    --canvas: #121614;
+    --surface: #1b211e;
+    --line: #2e3833;
+    --accent: #f97316;
+    --accent-hover: #fb923c;
+    --accent-ink: #1a0d05;
+    --focus: #60a5fa;
+    --danger-bg: #3b1512;
+    --danger-ink: #fecaca;
+    --felt: #164d33;
+    --felt-deep: #0c2f1f;
+    --card-face: #f6f2e8;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+    --shadow-2: 0 8px 24px rgb(0 0 0 / 50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-medium: 0ms;
+  }
+}

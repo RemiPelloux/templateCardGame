@@ -1,0 +1,17 @@
+{
+  "name": "@cardgame/protocol",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The wire contract between the server and the web client: routes, requests, views, errors.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@cardgame/engine": "workspace:*",
+    "@cardgame/game": "workspace:*"
+  }
+}
