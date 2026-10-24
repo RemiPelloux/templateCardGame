@@ -82,6 +82,7 @@ More in [architecture](docs/architecture.md).
 | [Multiplayer](docs/multiplayer.md)           | Rooms, revisions, live events, bots, HTTP endpoints   |
 | [Testing](docs/testing.md)                   | Unit, conformance, HTTP, browser tests and simulation |
 | [Design](docs/design.md)                     | Tokens, theming, components, accessibility            |
+| [Economy](docs/economy.md)                   | Coins, items, boosters, the shop, tuning              |
 | [Deployment](docs/deployment.md)             | Configuration, Docker, Caddy, backups                 |
 | [Crazy Eights rules](packages/game/RULES.md) | The example game, as a rules-document template        |
 
