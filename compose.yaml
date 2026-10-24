@@ -1,0 +1,30 @@
+# Production: the app behind Caddy, which obtains HTTPS certificates for DOMAIN automatically.
+# `cp .env.example .env`, set DOMAIN, then `docker compose up -d --build`.
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    init: true
+    environment:
+      PUBLIC_ORIGIN: https://${DOMAIN:?Set DOMAIN in .env}
+      TRUST_PROXY: '1'
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ['no-new-privileges:true']
+    cap_drop: [ALL]
+    volumes:
+      - game-data:/app/data
+    expose: ['3000']
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    command: caddy reverse-proxy --from ${DOMAIN} --to app:3000
+    ports: ['80:80', '443:443']
+    volumes:
+      - caddy-data:/data
+    depends_on:
+      app:
+        condition: service_healthy
+volumes:
+  game-data:
+  caddy-data:
