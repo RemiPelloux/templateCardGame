@@ -1,0 +1,123 @@
+/* The friends feature: presence dots, the navigation badge, the member dialog. */
+.presence {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 13px;
+  color: var(--muted);
+}
+.presence__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line);
+  flex: none;
+}
+.presence--online .presence__dot {
+  background: var(--online);
+}
+.presence--playing .presence__dot {
+  background: var(--gold);
+}
+
+.friend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.friend__since {
+  font-size: 13px;
+}
+
+.nav-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: var(--space-1);
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+}
+
+.lobby-invites {
+  display: grid;
+  gap: var(--space-2);
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-3);
+}
+.lobby-invites h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.dialog {
+  width: min(440px, calc(100vw - 2 * var(--space-4)));
+  max-height: calc(100dvh - 2 * var(--space-4));
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-2);
+}
+.dialog::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+.dialog__body {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+.dialog__title {
+  margin: 0;
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+
+.reasons {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.reasons legend {
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+.reasons__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+}
+
+.input--area {
+  min-height: 88px;
+  padding-block: var(--space-2);
+  resize: vertical;
+}
+
+/* On the phone tab bar the badge sits on the icon's corner instead of pushing the label down. */
+.tabbar__item {
+  position: relative;
+}
+.tabbar__item .nav-badge {
+  position: absolute;
+  top: var(--space-1);
+  left: 50%;
+  margin-left: var(--space-2);
+}

@@ -81,6 +81,7 @@ More in [architecture](docs/architecture.md).
 | [Making a game](docs/making-a-game.md)       | Step-by-step derivation, with checklist               |
 | [Multiplayer](docs/multiplayer.md)           | Rooms, revisions, live events, bots, HTTP endpoints   |
 | [Progression](docs/progression.md)           | XP, levels, missions, achievements, seasons, profiles |
+| [Social](docs/social.md)                     | Friends, presence, invites, blocks, reports           |
 | [Testing](docs/testing.md)                   | Unit, conformance, HTTP, browser tests and simulation |
 | [Design](docs/design.md)                     | Tokens, theming, components, accessibility            |
 | [Deployment](docs/deployment.md)             | Configuration, Docker, Caddy, backups                 |
