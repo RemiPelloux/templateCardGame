@@ -26,4 +26,5 @@ export const keys = {
   account: ['account'] as const,
   wallet: ['wallet'] as const,
   inventory: ['inventory'] as const,
+  shop: ['shop'] as const,
 };
