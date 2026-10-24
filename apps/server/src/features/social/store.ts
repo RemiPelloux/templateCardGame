@@ -55,25 +55,33 @@ export class SocialStore {
 
   friends(id: string): IdRow[] {
     return this.db
-      .prepare('SELECT friend_id AS id, since AS at FROM friendships WHERE account_id = ?')
+      .prepare(
+        'SELECT friend_id AS id, since AS at FROM friendships WHERE account_id = ? ORDER BY since, rowid',
+      )
       .all(id) as IdRow[];
   }
 
   incoming(id: string): IdRow[] {
     return this.db
-      .prepare('SELECT from_id AS id, created AS at FROM friend_requests WHERE to_id = ?')
+      .prepare(
+        'SELECT from_id AS id, created AS at FROM friend_requests WHERE to_id = ? ORDER BY created, rowid',
+      )
       .all(id) as IdRow[];
   }
 
   outgoing(id: string): IdRow[] {
     return this.db
-      .prepare('SELECT to_id AS id, created AS at FROM friend_requests WHERE from_id = ?')
+      .prepare(
+        'SELECT to_id AS id, created AS at FROM friend_requests WHERE from_id = ? ORDER BY created, rowid',
+      )
       .all(id) as IdRow[];
   }
 
   blocked(id: string): IdRow[] {
     return this.db
-      .prepare('SELECT blocked_id AS id, created AS at FROM blocks WHERE blocker_id = ?')
+      .prepare(
+        'SELECT blocked_id AS id, created AS at FROM blocks WHERE blocker_id = ? ORDER BY created, rowid',
+      )
       .all(id) as IdRow[];
   }
 
