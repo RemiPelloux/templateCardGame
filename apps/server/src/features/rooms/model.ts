@@ -1,5 +1,6 @@
 import type { Match } from '@cardgame/engine';
 import type { Command, Options, State } from '@cardgame/game';
+import type { RoomKind } from '@cardgame/protocol';
 
 /** A person stays “connected” this long after their last request or open live stream. */
 export const PRESENCE_MS = 20_000;
@@ -12,9 +13,11 @@ export const MAX_ROOMS = 500;
 export type GameMatch = Match<State, Command, Options>;
 
 export type RoomSeat = {
-  /** The person's player id; null for a bot. A seat never changes hands between people. */
+  /** The person's account id; null for a bot. A seat never changes hands between people. */
   player: string | null;
   name: string;
+  /** `name#tag` of the person, kept when a bot takes the seat over. */
+  handle: string | null;
   /** The bot playing this seat: chosen in the lobby, or taking over from someone who left. */
   bot: string | null;
   seen: number;
@@ -22,6 +25,9 @@ export type RoomSeat = {
 
 export type Room = {
   code: string;
+  kind: RoomKind;
+  /** A fixed deal (the daily challenge); absent for a fresh random deal. */
+  seed?: number;
   /** The player id of the host, who seats bots and deals. */
   host: string;
   seats: RoomSeat[];

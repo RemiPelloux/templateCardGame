@@ -4,9 +4,9 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import sirv from 'sirv';
 import { parseRoute } from '@cardgame/protocol';
-import { createApi } from './api/api';
-import type { Config } from './config';
-import { securityHeaders } from './http/policy';
+import { createApi } from './api';
+import type { Config } from './core/config';
+import { securityHeaders } from './core/http/policy';
 
 const SHUTDOWN_MS = 10_000;
 const TIMEOUTS = { request: 15_000, headers: 10_000, keepAlive: 5_000 };

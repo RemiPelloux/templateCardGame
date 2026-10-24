@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite';
-import { createApi, type Api } from './api/api';
-import { loadConfig } from './config';
+import { createApi, type Api } from './api';
+import { loadConfig } from './core/config';
 
 /**
  * Mounts the real API inside Vite's dev and preview servers: one process, one port, hot reload

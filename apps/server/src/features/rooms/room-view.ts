@@ -15,10 +15,12 @@ export function roomView(room: Room, viewer: Player, presence: Presence): RoomVi
   const seat = you >= 0 ? you : null;
   return {
     code: room.code,
+    kind: room.kind,
     revision: room.revision,
     status: statusOf(room),
     seats: room.seats.map((s) => ({
       name: s.name,
+      handle: s.handle,
       bot: s.bot,
       host: s.player !== null && s.player === room.host,
       connected: isConnected(s, presence.now) || presence.online.has(s.player ?? ''),
@@ -27,6 +29,7 @@ export function roomView(room: Room, viewer: Player, presence: Presence): RoomVi
     isHost: room.host === viewer.id,
     limits: { minSeats: game.players.min, maxSeats: game.players.max },
     bots: Object.keys(bots),
+    options: room.options,
     match: room.match ? viewMatch(game, room.match, seat) : null,
   };
 }

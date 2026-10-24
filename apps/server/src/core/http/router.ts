@@ -1,8 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { isRuleError } from '@cardgame/engine';
 import type { Player } from '@cardgame/protocol';
-import { ApiError, errorBody, unauthorized } from '../http/errors';
-import { readJson, sendJson } from '../http/io';
+import { ApiError, errorBody, unauthorized } from './errors';
+import { readJson, sendJson } from './io';
 
 const NO_CONTENT = 204;
 const SERVER_ERROR = 500;
@@ -73,8 +73,9 @@ export async function run(handler: Handler, ctx: Context) {
 /** Refusals keep their message; anything unexpected is logged and hidden behind a generic 500. */
 export function sendError(res: ServerResponse, error: unknown) {
   if (error instanceof ApiError)
-    return sendJson(res, error.status, errorBody(error.code, error.message));
-  if (isRuleError(error)) return sendJson(res, 400, errorBody(error.code, error.message));
+    return sendJson(res, error.status, errorBody(error.code, error.message, error.params));
+  if (isRuleError(error))
+    return sendJson(res, 400, errorBody(error.code, error.message, error.params));
   console.error(
     JSON.stringify({ event: 'error', message: String((error as Error)?.stack ?? error) }),
   );

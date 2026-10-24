@@ -1,7 +1,7 @@
 import { act, createMatch } from '@cardgame/engine';
 import { bots, DEFAULT_BOT, game } from '@cardgame/game';
 import type { CommandRequest, Player, SeatsRequest, StartRequest } from '@cardgame/protocol';
-import { ApiError, forbidden } from '../http/errors';
+import { ApiError, forbidden } from '../../core/http/errors';
 import { humans, isLive, seatOf, type Room } from './model';
 
 /**
@@ -20,19 +20,21 @@ export function join(room: Room, player: Player, now: number) {
   if (seat >= 0) return void (room.seats[seat]!.seen = now);
   requireLobby(room);
   if (room.seats.length >= game.players.max) throw new ApiError('This table is full.', 'ROOM_FULL');
-  room.seats.push({ player: player.id, name: player.name, bot: null, seen: now });
+  const handle = `${player.name}#${player.tag}`;
+  room.seats.push({ player: player.id, name: player.name, handle, bot: null, seen: now });
 }
 
 export function changeSeats(room: Room, player: Player, request: SeatsRequest) {
   requireHost(room, player);
   requireLobby(room);
+  if (room.kind === 'ranked') throw forbidden('Ranked tables have no bots.');
   if (request.action === 'addBot') {
     const bot = request.bot ?? DEFAULT_BOT;
     if (!bots[bot]) throw new ApiError('Unknown bot.', 'UNKNOWN_BOT');
     if (room.seats.length >= game.players.max)
       throw new ApiError('This table is full.', 'ROOM_FULL');
     const number = room.seats.filter((s) => s.bot).length + 1;
-    room.seats.push({ player: null, name: `Bot ${number}`, bot, seen: 0 });
+    room.seats.push({ player: null, name: `Bot ${number}`, handle: null, bot, seen: 0 });
     return;
   }
   const seat = room.seats[request.seat];
@@ -44,8 +46,15 @@ export function changeSeats(room: Room, player: Player, request: SeatsRequest) {
 export function start(room: Room, player: Player, request: StartRequest) {
   requireHost(room, player);
   requireLobby(room);
+  if (room.kind !== 'casual') throw forbidden('This table deals by itself.');
   if (request.options) room.options = { ...room.options, ...request.options };
-  room.match = createMatch(game, { players: room.seats.length, options: room.options });
+  deal(room);
+}
+
+/** A new match for the seats as they are, with the room's options and fixed seed if any. */
+export function deal(room: Room) {
+  const seed = room.seed === undefined ? {} : { seed: room.seed };
+  room.match = createMatch(game, { players: room.seats.length, options: room.options, ...seed });
 }
 
 export function play(room: Room, player: Player, request: CommandRequest) {
