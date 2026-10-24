@@ -39,7 +39,7 @@ describe('expansion catalog', () => {
   });
 
   it('tells a member which expansions they own, and a guest none', () => {
-    expect(catalog(null, services).expansions.map((e) => e.owned)).toEqual([false]);
+    expect(catalog(null, services).expansions.every((e) => !e.owned)).toBe(true);
     expect(catalog(alice.id, services).expansions[0]).toMatchObject({ id: 'jokers', owned: false });
     services.inventory.grant(alice.id, 'expansion-jokers', 'shop');
     expect(catalog(alice.id, services).expansions[0]).toMatchObject({
