@@ -1,6 +1,6 @@
 {
   "name": "@cardgame/web",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "The React client: home, lobby, the table, and offline practice against bots.",
   "type": "module",
