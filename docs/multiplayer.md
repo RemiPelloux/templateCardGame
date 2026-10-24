@@ -1,73 +1,82 @@
 # Multiplayer
 
-## Rooms
+Tables run on the server. Players send moves with the revision they saw, the server applies
+them with the game's rules, and every client is told that the table changed.
 
-A room is a table: a five-character code (no `0/O/1/I`), a host, seats, lobby options, an
-optional match and a **revision** bumped on every change (`apps/server/src/rooms`).
+## Tables
 
-| File              | Role                                                            |
-| ----------------- | --------------------------------------------------------------- |
-| `model.ts`        | `Room`, `RoomSeat`, timings and limits                          |
-| `lobby.ts`        | Pure room rules: join, seats, start, play, leave                |
-| `room-service.ts` | Holds rooms; `update` → `commit` (revision, bots, save, events) |
-| `room-bots.ts`    | Which bot must act, when, and its move                          |
-| `room-view.ts`    | One member's `RoomView`, with the match through their seat only |
-| `room-events.ts`  | Revision signals and the Server-Sent Events stream              |
+A table (a _room_) has a five-character code (no `0`, `O`, `1` or `I`), a host, seats, lobby
+options, an optional match and a **revision** that goes up on every change. It has a kind:
 
-Lifecycle: the creator sits first and hosts. People join until the table is full; the host adds
-or removes bots, then deals. Someone who leaves the lobby frees the seat; someone who leaves a
-live match is replaced by a bot under the same name. A leaving host passes the room to the next
-person. A room closes when no person is left, or after two idle hours with no open stream.
+| Kind     | Opened by                    | Bots               | Options      |
+| -------- | ---------------------------- | ------------------ | ------------ |
+| `casual` | A member, from the home page | Host adds them     | Host chooses |
+| `daily`  | The daily challenge          | Two, dealt with it | Fixed seed   |
+| `ranked` | Matchmaking                  | None               | Fixed        |
+
+Server tables (`daily`, `ranked`) are dealt at once by `rooms.openMatch({ kind, players, bots,
+seed, options })`; nobody can change their seats or options.
+
+Lifecycle of a casual table:
+
+1. The creator sits first and hosts.
+2. Members join with the code, until the table is full or the match has started.
+3. The host adds or removes bots, picks options (an expansion they own), and deals.
+4. Leaving the lobby frees the seat. Leaving a live match hands the seat to a bot, which keeps
+   the name. A leaving host passes the table to the next person.
+5. Once a match ends, the host may deal a rematch.
+
+A table closes when no person is left at it, or when it has had no change and no open stream
+for two hours. Any signed-in member who knows the code can watch a table; they see no hand.
+
+## Revisions
+
+Every move is sent as `{ revision, command }`. If the table changed since that revision, the
+server answers `409 STALE_REVISION` and the client refreshes: a move is never applied to a
+position its player did not see.
 
 ## Live updates
 
-`GET /api/rooms/:code/events` is a Server-Sent Events stream: `ready` at once, then
-`room {"revision": n}` on each change (and when presence changes), with a keep-alive comment
-every 20 s. It never carries room content. The client (`apps/web/src/net/useRoom.ts`) fetches
-its own view on each event, ignores responses older than what it shows, and polls every 15 s as
-a safety net in case a proxy holds the stream back. An open stream counts as "connected".
+`GET /api/rooms/:code/events` is a Server-Sent Events stream:
 
-## Commands and revisions
+- `retry: 3000`, then `ready` as soon as it opens;
+- `room` with `{ "revision": n }` on every change, and when someone connects or disconnects;
+- a `: ping` comment every 20 seconds, so proxies keep it open;
+- revision `-1` when the table closes.
 
-`POST /api/rooms/:code/commands` with `{ revision, command }`. The server refuses with:
-
-| Status | Code             | When                                         |
-| ------ | ---------------- | -------------------------------------------- |
-| 409    | `STALE_REVISION` | The room changed since the client's view     |
-| 400    | `NOT_YOUR_TURN`  | The seat is not an actor                     |
-| 400    | game codes       | The game's `RuleError` (`CANNOT_PLAY`, …)    |
-| 403    | `FORBIDDEN`      | Not seated, or not the host for host actions |
+The stream never carries the table's content. On each `room` event the client
+(`apps/web/src/features/rooms/useRoom.ts`) fetches its own view, ignores answers older than
+what it shows, and also polls every 15 seconds in case a proxy holds the stream back. An open
+stream counts its member as connected.
 
 ## Bots
 
-Bots are seats with `bot: '<id>'` and no player. After each commit, `scheduleBot` sets `botAt`
-900 ms ahead if a bot must act; `RoomService.tick` (every 200 ms) plays one due move and commits
-it, which schedules the next. A table of bots therefore plays at a human-readable pace, and
-restarts resume where they stopped (`botAt` is saved with the room).
+A bot seat has a bot id (`basic` or `random`) and no player. After every change, if a bot must
+act, the table schedules its move 900 ms later; a tick every 200 ms plays due moves. A table of
+bots therefore plays at a pace people can follow, and a restart resumes where it stopped.
 
-## Endpoints
+## Persistence
 
-| Method | Path                        | Body                                                            | Returns                  |
-| ------ | --------------------------- | --------------------------------------------------------------- | ------------------------ |
-| GET    | `/api/health`               |                                                                 | `{ ok, rooms, streams }` |
-| GET    | `/api/session`              |                                                                 | `{ player }` or 401      |
-| POST   | `/api/session`              | `{ name }`                                                      | `{ player }` + cookie    |
-| DELETE | `/api/session`              |                                                                 | 204                      |
-| POST   | `/api/rooms`                |                                                                 | `RoomView`               |
-| GET    | `/api/rooms/:code`          |                                                                 | `RoomView`               |
-| POST   | `/api/rooms/:code/join`     |                                                                 | `RoomView`               |
-| POST   | `/api/rooms/:code/leave`    |                                                                 | 204                      |
-| POST   | `/api/rooms/:code/seats`    | `{ action: 'addBot', bot? }` or `{ action: 'removeBot', seat }` | `RoomView`               |
-| POST   | `/api/rooms/:code/start`    | `{ options? }`                                                  | `RoomView`               |
-| POST   | `/api/rooms/:code/commands` | `{ revision, command }`                                         | `RoomView`               |
-| GET    | `/api/rooms/:code/events`   |                                                                 | SSE stream               |
+Each table is saved to SQLite on every change and restored at start-up. A finished match is
+archived in `matches` with its seed, options and history, and announced to other features as
+`match.finished` (progression, the daily challenge and ranked duels listen to it).
 
-Errors are always `{ "error": { "code", "message" } }`. Types for every body live in
-`packages/protocol`.
+## Tuning
 
-## HTTP hardening
+| Constant       | Value                     | File                                                         |
+| -------------- | ------------------------- | ------------------------------------------------------------ |
+| `BOT_DELAY_MS` | 900                       | `apps/server/src/features/rooms/model.ts`                    |
+| `PRESENCE_MS`  | 20 s                      | same: a member counts as connected this long after a request |
+| `ROOM_IDLE_MS` | 2 h                       | same                                                         |
+| `MAX_ROOMS`    | 500                       | same: beyond it, `503 BUSY`                                  |
+| Writes         | 240 per minute per member | `apps/server/src/features/rooms/routes.ts`                   |
+| Keep-alive     | 20 s                      | `apps/server/src/features/rooms/room-events.ts`              |
+| Client polling | 15 s                      | `apps/web/src/features/rooms/useRoom.ts`                     |
 
-Security headers and a strict CSP on every response, an origin check on writes (with
-`SameSite=Lax` HttpOnly cookies this blocks cross-site requests), 64 KiB JSON bodies, per-IP
-limits on session creation and per-player limits on writes, request timeouts, structured JSON
-request logs, and a graceful shutdown that drains connections before closing the database.
+## Extending
+
+- Other features add panels to the lobby or under a finished match through
+  `apps/web/src/features/rooms/slots.ts`.
+- A feature can check lobby options before they are applied with `rooms.guardOptions(guard)`;
+  the expansion feature uses it to refuse an expansion the host does not own.
+- Endpoints are listed in the [HTTP API](api.md#rooms).

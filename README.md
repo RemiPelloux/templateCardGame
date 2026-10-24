@@ -1,130 +1,98 @@
 # Card Game Template
 
-A production-shaped starting point for **turn-based, multiplayer card games** in TypeScript.
-Write your rules once as a pure `GameDefinition`; the template already provides the rest:
+A complete starting point for **online, turn-based card games** in TypeScript. You write the
+rules once, as a pure `GameDefinition`. The template supplies everything around them: a
+server that runs matches, bots, accounts, a metagame, a React client in English and French,
+tests and deployment.
 
-- **Engine**: deals matches, applies commands, hides private cards per seat, drives bots,
-  simulates thousands of games, and replays any match exactly from its seed.
-- **Expansions (DLC)**: a registry of expansions with versioned rules, ownership and hooks into
-  the base game; `pnpm new:expansion` scaffolds one. Ships with _Jokers & Tricks_.
-- **Server**: authoritative rooms with live updates (Server-Sent Events), bot seats, SQLite
-  persistence that survives restarts, and a hardened HTTP layer, organised as feature modules.
-- **Platform**: accounts with passwords and recovery codes; profiles, XP, levels, missions,
-  achievements and seasons; a coin shop, boosters and a collection of cosmetics; friends,
-  presence, table invites, blocks and reports; a daily challenge; ranked duels with Elo.
-- **Web client**: React 19, installable as a PWA, in **English and French** with typed
-  translations: adding a language is one line plus the translations the compiler asks for.
-- **Operations**: anonymous field telemetry, a server error log with alerts, Docker and Caddy.
-- **Quality**: strict TypeScript, a conformance harness that fuzzes your rules, unit, HTTP and
-  browser tests, enforced layer boundaries and CI.
+It ships with **Crazy Eights** and one expansion, **Jokers & Tricks**, both playable and
+tested. Replace them with your game.
 
-It ships with **Crazy Eights** as a complete, tested example. Replace it with your game.
+## What you get
 
-```text
-packages/
-  engine/     @cardgame/engine    Game-agnostic kernel: matches, views, bots, expansions. Pure.
-  game/       @cardgame/game      YOUR RULES. Crazy Eights + its expansions: setup, commands, bots.
-  meta/       @cardgame/meta      The metagame as pure data: items, levels, missions, boosters, Elo.
-  i18n/       @cardgame/i18n      Typed translations, plurals and formatting. No dependency.
-  protocol/   @cardgame/protocol  The wire contract between the server and its clients.
-apps/
-  server/     @cardgame/server    Node server: one folder per feature under src/features/.
-  web/        @cardgame/web       React client: one folder per feature under src/features/.
-docs/                             Architecture, engine API, guides.
-scripts/                          Boundary check, bot simulator, project rename.
-```
+| Area         | Included                                                                                  |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| Rules engine | Matches, seeded shuffles, per-seat views, bots, simulation, exact replays, a rules fuzzer |
+| Expansions   | Versioned DLC with ownership checks and rule hooks; `pnpm new:expansion` scaffolds one    |
+| Multiplayer  | Server-authoritative tables, live updates, bot seats, reconnection after restarts         |
+| Accounts     | Passwords, recovery codes, device sessions, data export and deletion                      |
+| Metagame     | Levels, missions, achievements, seasons, coins, a shop with boosters, cosmetics           |
+| Social       | Friends, presence, table invites, blocks, reports                                         |
+| Competitive  | A daily challenge with streaks and rankings, ranked duels with Elo                        |
+| Client       | React 19, installable PWA, offline practice, English and French                           |
+| Operations   | Anonymous telemetry, error log with alerts, Docker and Caddy, CI                          |
 
 ## Quick start
 
-Requires Node 22.12+ and pnpm 10 (`corepack enable`).
+You need Node 22.12 or later and pnpm 10 (`corepack enable`).
 
 ```bash
 pnpm install
-pnpm dev          # app + real API on http://localhost:5173 (one process)
-pnpm test         # unit, rules-conformance and HTTP tests
-pnpm verify       # format, boundaries, types, tests, build: what CI runs
+pnpm dev       # http://localhost:5173 — the app and the real API in one process
+pnpm test      # unit, rules and HTTP tests
+pnpm verify    # everything CI checks
 ```
 
-Production: `pnpm build && pnpm start` (port 3000), or `docker compose up -d --build`; see
-[deployment](docs/deployment.md).
+New here? Follow **[Getting started](docs/getting-started.md)**: it takes you from this
+checkout to your own game.
 
-## Make it your game
+## How it is organised
 
-1. `pnpm rename "Moon Poker" moon-poker` renames the project, the package scope and the image.
-2. Write your rules in [`packages/game`](packages/game): state, commands, setup, `apply`,
-   `legalCommands`, `view`, `outcome`, and a bot.
-3. Draw your table in [`apps/web/src/game`](apps/web/src/game): the board, the log sentences,
-   and the seat summary.
-4. `pnpm test`: the conformance harness plays hundreds of seeded games against your rules and
-   tells you which seed broke which contract.
-
-The full walkthrough, with a checklist, is in **[docs/making-a-game.md](docs/making-a-game.md)**.
-
-## How it fits together
-
-```mermaid
-flowchart LR
-  subgraph Browser
-    UI[Table and board] -->|command| Ctl{MatchController}
-    Ctl -->|practice| LocalEngine[engine in the browser]
-    Ctl -->|online| API
-  end
-  API[HTTP API] --> Rooms[RoomService]
-  Rooms -->|act| Engine[engine + your game]
-  Rooms --> DB[(SQLite)]
-  Rooms -->|revision n| SSE[live events]
-  SSE -.->|refetch| API
-  Rooms -->|viewMatch per seat| API
+```text
+packages/
+  engine/     the game-agnostic kernel: matches, views, bots, expansions (pure, no I/O)
+  game/       your rules: Crazy Eights and its expansions
+  meta/       the metagame as data: items, levels, missions, boosters, Elo
+  i18n/       typed translations
+  protocol/   the types and endpoints shared by server and client
+apps/
+  server/     Node server, one folder per feature in src/features/
+  web/        React client, one folder per feature in src/features/
+docs/         the guides below
+scripts/      boundary check, simulator, scaffolding, icons, ops reports
 ```
 
-The server is the only authority online: clients send commands with the revision they saw,
-never state. Each seat gets its own projection (`view`), so other hands never leave the server.
-More in [architecture](docs/architecture.md).
+The server is the only authority: clients send commands, never state, and each player only
+ever receives their own view of a match. See [architecture](docs/architecture.md).
 
 ## Documentation
 
-| Guide                                        | What it covers                                        |
-| -------------------------------------------- | ----------------------------------------------------- |
-| [Architecture](docs/architecture.md)         | Layers, data flow, authority, privacy, boundaries     |
-| [Engine](docs/engine.md)                     | The `GameDefinition` contract and the engine API      |
-| [Making a game](docs/making-a-game.md)       | Step-by-step derivation, with checklist               |
-| [Expansions](docs/making-an-expansion.md)    | DLC: extra cards and rules, ownership, scaffolding    |
-| [Adding a feature](docs/features.md)         | Server modules, events, web folders, registries       |
-| [Translations](docs/i18n.md)                 | How text is translated, adding a language             |
-| [Multiplayer](docs/multiplayer.md)           | Rooms, revisions, live events, bots, HTTP endpoints   |
-| [Progression](docs/progression.md)           | XP, levels, missions, achievements, seasons, profiles |
-| [Social](docs/social.md)                     | Friends, presence, invites, blocks, reports           |
-| [Competitive](docs/competitive.md)           | Daily challenge, rankings, Elo and matchmaking        |
-| [Testing](docs/testing.md)                   | Unit, conformance, HTTP, browser tests and simulation |
-| [Design](docs/design.md)                     | Tokens, theming, components, accessibility            |
-| [Economy](docs/economy.md)                   | Coins, items, boosters, the shop, tuning              |
-| [Deployment](docs/deployment.md)             | Configuration, Docker, Caddy, backups                 |
-| [Operations](docs/operations.md)             | Telemetry, error log, alerts, PWA updates and icons   |
-| [Crazy Eights rules](packages/game/RULES.md) | The example game, as a rules-document template        |
+Start with [getting started](docs/getting-started.md); every guide is listed in
+[docs/README.md](docs/README.md).
 
-## Scripts
+| Build your game                           | Understand the platform              | Run it                           |
+| ----------------------------------------- | ------------------------------------ | -------------------------------- |
+| [Making a game](docs/making-a-game.md)    | [Architecture](docs/architecture.md) | [Deployment](docs/deployment.md) |
+| [Engine](docs/engine.md)                  | [Multiplayer](docs/multiplayer.md)   | [Operations](docs/operations.md) |
+| [Expansions](docs/making-an-expansion.md) | [Accounts](docs/accounts.md)         | [Testing](docs/testing.md)       |
+| [Adding a feature](docs/features.md)      | [Economy](docs/economy.md)           | [HTTP API](docs/api.md)          |
+| [Translations](docs/i18n.md)              | [Progression](docs/progression.md)   | [Design](docs/design.md)         |
+|                                           | [Social](docs/social.md)             |                                  |
+|                                           | [Competitive](docs/competitive.md)   |                                  |
 
-| Command                | Does                                                        |
-| ---------------------- | ----------------------------------------------------------- |
-| `pnpm dev`             | Vite dev server with the real API mounted                   |
-| `pnpm build`           | Production build of the web app (`apps/web/dist`)           |
-| `pnpm start`           | Production server: API and built app on `PORT` (3000)       |
-| `pnpm test`            | Vitest across every package                                 |
-| `pnpm test:e2e`        | Playwright browser tests (builds, then serves on port 4317) |
-| `pnpm check`           | TypeScript in every package                                 |
-| `pnpm lint:boundaries` | Fails if a layer imports what it must not                   |
-| `pnpm sim`             | Bot-vs-bot statistics: `pnpm sim --games 1000 --players 4`  |
-| `pnpm verify`          | Everything CI checks, in order                              |
-| `pnpm rename`          | Rename the template to your project                         |
-| `pnpm icons`           | Draw the app icons (PWA, Apple) from the favicon            |
-| `pnpm new:expansion`   | Scaffold an expansion (DLC) and register it                 |
+## Commands
+
+| Command                | Does                                                                  |
+| ---------------------- | --------------------------------------------------------------------- |
+| `pnpm dev`             | Development server with the real API (port 5173)                      |
+| `pnpm build`           | Production build of the web app into `apps/web/dist`                  |
+| `pnpm start`           | Production server: API and built app on `PORT` (3000)                 |
+| `pnpm test`            | Unit, rules and HTTP tests (`pnpm test:watch` to keep them running)   |
+| `pnpm test:e2e`        | Browser tests: builds, then serves on port 4317 with a fresh database |
+| `pnpm check`           | TypeScript in every package                                           |
+| `pnpm lint:boundaries` | Fails when a package imports something its layer may not              |
+| `pnpm format`          | Prettier (`pnpm format:check` only checks)                            |
+| `pnpm verify`          | Format, boundaries, types, tests and build: what CI runs              |
+| `pnpm sim`             | Bot-versus-bot statistics, e.g. `pnpm sim --games 1000 --players 4`   |
+| `pnpm new:expansion`   | Scaffold an expansion: `pnpm new:expansion pirates "Pirates"`         |
+| `pnpm rename`          | Rename the project: `pnpm rename "Moon Poker" moon-poker`             |
+| `pnpm icons`           | Redraw the app icons from `apps/web/public/favicon.svg`               |
+| `pnpm docker:build`    | Build the production image                                            |
 
 ## Origin
 
-The architecture is extracted from **Deal Club**, a production multiplayer card game: pure
-transitions, server authority, per-seat projection, revision-checked commands, SSE revision
-signals with polling as a safety net, bot sweeps, and the HTTP hardening. The game-specific
-parts (accounts, shop, progression, extensions) were left out; see
-[architecture § extending](docs/architecture.md#extending) for where they would plug in.
+The architecture comes from Deal Club, a multiplayer card game in production: pure
+transitions, server authority, per-seat views, revision-checked commands, and live updates
+with polling as a safety net.
 
 Private and unlicensed: all rights reserved.

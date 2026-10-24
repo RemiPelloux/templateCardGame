@@ -1,95 +1,102 @@
 # Making a game
 
-The template is wired so that a new game touches **two folders**: `packages/game` (rules) and
-`apps/web/src/game` (its board). The engine, server, protocol and table shell stay as they are.
+Replace Crazy Eights with your game. The rules go in `packages/game`, everything the player
+sees of them in `apps/web/src/game`; the platform around them stays as it is.
 
-## 0. Rename the project
+## 1. Rename the project
 
 ```bash
-pnpm rename "Moon Poker" moon-poker   # display name, package scope, Docker image
+pnpm rename "Moon Poker" moon-poker   # display name, package scope, image name (needs a clean git tree)
 pnpm install
 ```
 
-Update `<title>`, the description and the colours in `apps/web/index.html`, and the home
-headline in `apps/web/src/screens/HomeScreen.tsx`.
+Then update the app's name and colours in `apps/web/index.html`, and the name and tagline in
+`apps/web/src/game/i18n.ts` (`name`, `tagline`) in every language.
 
-## 1. Write the rules down first
+## 2. Write the rules down
 
-Copy [`packages/game/RULES.md`](../packages/game/RULES.md) and rewrite it for your game: the
-components, the setup, a turn, every special card, how it ends, and the edge cases (empty deck,
-ties, a player leaving). Each sentence of that document should map to a test.
+Copy [`packages/game/RULES.md`](../packages/game/RULES.md) and rewrite it for your game:
+components, setup, a turn, every special card, how it ends, scoring, and the edge cases (empty
+deck, ties, a player leaving). Each rule should end up as a test.
 
-## 2. Model the state, commands and view
+## 3. Model state, commands and view
 
 In `packages/game/src/types.ts`:
 
-- **State**: everything, secrets included, as plain JSON. Prefer arrays of ids and small
-  records; keep the top of a pile at the end of its array (the zone helpers assume it).
-- **Command**: a discriminated union of what a player can _decide_: `play`, `draw`, `bid`,
-  `pass`… Everything a choice needs travels in the command (the eight's suit, a target seat).
-- **View**: what one seat may know. Hand sizes, not hands; deck size, not deck.
+- **State**: everything, secrets included, as plain JSON. Keep the top of a pile at the end of
+  its array: the engine's zone helpers expect it.
+- **Command**: a union of what a player can _decide_ (`play`, `draw`, `bid`, `pass`…). Every
+  piece of a choice travels in the command: the suit named with an eight, a target seat.
+- **View**: what one seat may know. Hand sizes, not hands; the deck's size, not its order.
+- **Options**: what a lobby may choose. Keep `expansion` and `expansionRules` if you keep
+  expansions: rooms and the shop read them.
 
-Multi-step decisions (choose a target, then a card) are usually best as a **pending field** in
-the state: `apply` stores `pending: { type: 'chooseTarget', seat }`, `actors` returns that seat,
-and `legalCommands` offers only the answers. Simultaneous phases (everyone passes three cards)
-return several seats from `actors` and record each answer until all are in.
+A decision in several steps (choose a target, then a card) is best stored as a pending field
+in the state: `apply` records it, `actors` returns the seat that must answer, `legalCommands`
+offers only the answers. For simultaneous phases, return several seats from `actors` and
+record each answer until all are in.
 
-## 3. Implement the definition
+## 4. Implement the definition
 
-| File            | Writes                                                          |
-| --------------- | --------------------------------------------------------------- |
-| `constants.ts`  | Every number of the rules, named: hand size, targets, penalties |
-| `cards.ts`      | The deck and pure helpers (`canPlay`, scores)                   |
-| `setup.ts`      | Shuffle and deal with `ctx.rng`; log the opening                |
-| `parse.ts`      | `parseCommand` and `parseOptions` with the engine's readers     |
-| `rules.ts`      | `apply`, `legalCommands`, `actors`                              |
-| `view.ts`       | The per-seat projection                                         |
-| `outcome.ts`    | Winners, scores, reason                                         |
-| `bots.ts`       | At least one `greedyBot`; list them in `bots`                   |
-| `definition.ts` | Wires it all into `game: GameDefinition`                        |
+| File (`packages/game/src/`) | Holds                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `constants.ts`              | Every number of the rules, named (`RULES_VERSION` included)                     |
+| `cards.ts`, `card-kinds.ts` | The deck and pure helpers (`canPlay`, penalties)                                |
+| `setup.ts`                  | Shuffle and deal with `ctx.rng`; log the opening                                |
+| `parse.ts`                  | `parseCommand` and `parseOptions`, with the engine's readers                    |
+| `rules.ts`                  | `apply`, `legalCommands`, `actors`                                              |
+| `view.ts`                   | The per-seat projection                                                         |
+| `outcome.ts`                | Winners, scores, reason                                                         |
+| `bots.ts`                   | At least one `greedyBot`, listed in `bots`                                      |
+| `hooks.ts`, `extension.ts`  | Your extension points for expansions (see [expansions](making-an-expansion.md)) |
+| `definition.ts`             | Everything wired into `game: GameDefinition`                                    |
 
-Keep exporting `game`, `bots`, `DEFAULT_BOT`, `MIN_PLAYERS`, `MAX_PLAYERS` and the types
-`State`, `Command`, `View`, `Options` from `src/index.ts`: the server and the web client
-import those names.
+`src/index.ts` must keep exporting the names the apps import: `game`, `bots`, `DEFAULT_BOT`,
+`MIN_PLAYERS`, `MAX_PLAYERS`, `expansions`, `isStandard`, and the types `State`, `Command`,
+`View`, `Options` and `Card`.
 
-## 4. Test it
+## 5. Test it
 
-- **Rules**: one `describe` per section of RULES.md, built from hand-written positions
-  (`tests/helpers.ts` → `position({ hands, discard, … })`).
-- **Conformance**: keep `tests/conformance.test.ts`; change `cardsConserved` and `handsSecret`
-  to your game's invariants. It plays a hundred seeded games and pinpoints any broken contract.
-- **Balance**: `pnpm sim --games 2000 --players 4` and `--bot basic --rivals random`. Check that
-  the first seat has no large edge and that games end in a reasonable number of moves.
+- **Rules**: one `describe` per section of your rules document, built from hand-written
+  positions (`tests/helpers.ts`: `position({ hands, discard, … })`).
+- **Conformance**: keep `tests/conformance.test.ts` and change its two checks to your game's:
+  what is conserved (every card exactly once), and what is secret (no other hand in a view).
+  It plays 20 seeded matches per player count and names the seed of any broken promise.
+- **Balance**: `pnpm sim --games 2000 --players 4`, then `--bot basic --rivals random`. The first
+  seat should have no large edge, matches should end in a sensible number of moves, and your
+  bot should beat random play.
 
-## 5. Draw the board
+## 6. Draw the board
 
-In `apps/web/src/game`, implement the `GameUi` contract (`apps/web/src/table/game-ui.ts`):
+`apps/web/src/game/` implements the table's `GameUi` contract (`apps/web/src/table/game-ui.ts`):
 
-- `Board`: receives the `MatchController` (`view`, `send`, `names`, `busy`, `error`). Read
-  `view.state` (your `View`) and `view.legal` to know what is clickable: never re-implement the
-  rules in the UI.
-- `describe(entry, names)`: one sentence per log event.
-- `seatSummary(view, seat)`: the public line under each name ("5 cards", "12 points").
-- `outcomeReason(outcome)`.
+- `Board`: receives the `MatchController` (`view`, `send`, `names`, `busy`, `error`…). Read
+  `view.state` (your `View`) and `view.legal` to know what is clickable. Never re-implement a
+  rule in the UI.
+- `describe(entry, names, t)`: one sentence per log event, through translations.
+- `seatSummary(view, seat, t)`: the public line under each name ("5 cards").
+- `outcomeReason(outcome, t)`: why the match ended.
 
-If your cards are not the standard deck, replace `components/PlayingCard.tsx` and the card
-tokens in `styles/tokens.css`. Then update the two e2e specs in `apps/web/e2e`.
+Replace `PlayingCard.tsx` if your cards are not the standard deck, and the card tokens in
+`apps/web/src/styles/tokens.css`. Write every word in `apps/web/src/game/i18n.ts`, including
+the `rules` sections shown on the rules page. Then update the browser tests in
+`apps/web/e2e/`.
 
-## 6. Ship
+## 7. Decide what platform you keep
 
-```bash
-pnpm verify && pnpm test:e2e
-docker compose up -d --build
-```
+Every feature is a server folder, a web folder and one line in each registry. To drop one,
+remove its folders and lines; the compiler lists anything that still refers to it. See
+[adding a feature](features.md).
 
 ## Checklist
 
-- [ ] RULES.md rewritten; every rule has a test
-- [ ] `State` is JSON; all randomness through `ctx.rng`
-- [ ] Every illegal move throws `RuleError` with a readable message and a stable code
+- [ ] Rules document written; every rule has a test
+- [ ] `State` is JSON; all randomness comes from `ctx.rng`
+- [ ] Every illegal move throws `RuleError` with a stable code, translated in `game/i18n.ts`
 - [ ] `legalCommands` returns nothing for seats that may not act
-- [ ] `view` hides other hands, the deck order and any secret choice
-- [ ] Conformance passes with your invariants and a secrecy check
-- [ ] A bot that beats random play; `pnpm sim` shows sane game lengths
-- [ ] Board, log sentences and seat summary written; e2e specs updated
-- [ ] `rulesVersion` bumped whenever rules change after launch
+- [ ] `view` hides other hands, the deck order and every secret choice
+- [ ] Conformance passes with your conservation and secrecy checks
+- [ ] A bot that beats random play; `pnpm sim` shows sensible game lengths
+- [ ] Board, log sentences, seat summary and rules page written in every language
+- [ ] Browser tests updated; `pnpm verify` and `pnpm test:e2e` pass
+- [ ] `RULES_VERSION` bumped for every rule change after launch
