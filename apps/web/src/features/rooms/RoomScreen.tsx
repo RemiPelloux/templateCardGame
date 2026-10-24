@@ -23,6 +23,7 @@ function onlineController(
     view: room.match,
     names: room.seats.map((s) => s.name),
     bots: room.seats.map((s) => s.bot !== null),
+    frames: room.seats.map((s) => s.looks?.frame),
     send: handle.play,
     busy: handle.busy,
     error: handle.error ? errorText(handle.error) : null,
