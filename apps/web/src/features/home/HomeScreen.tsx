@@ -16,6 +16,7 @@ import { Button } from '../../ui/Button';
 import { Notice } from '../../ui/Notice';
 import { useAction } from '../../ui/useAction';
 import { useSession } from '../account/useSession';
+import { DailyHomeCard } from '../daily/DailyHomeCard';
 import { startPractice } from '../practice/PracticeScreen';
 import { MissionsPanel } from '../progression/MissionsPanel';
 
@@ -132,6 +133,7 @@ export function HomeScreen() {
         <Practice />
         {session.status === 'signed-in' && <Online />}
         {session.status === 'signed-in' && <MissionsPanel />}
+        {session.status === 'signed-in' && <DailyHomeCard />}
         {session.status === 'guest' && <Guest />}
         {session.status === 'offline' && <p className="panel muted">{t('home.offline')}</p>}
       </div>

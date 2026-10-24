@@ -13,14 +13,17 @@ Read once at start-up by `apps/server/src/config.ts`:
 | `TRUST_PROXY`       |                    | `1` only behind a private proxy that sets X-Forwarded-For                                       |
 | `LOG_REQUESTS`      | on                 | `0` silences the per-request JSON lines                                                         |
 | `ALERT_WEBHOOK_URL` |                    | ntfy, Discord or Slack webhook told about server errors; see [operations](operations.md#alerts) |
+| `DAILY_SALT`        | dev value          | Secret behind each daily deal; **required** in production                                       |
+| `DAILY_TIME_ZONE`   | `Europe/Paris`     | IANA zone whose midnight starts a new daily challenge                                           |
 
-With `NODE_ENV=production` the server refuses to start without a valid `PUBLIC_ORIGIN`, and
+With `NODE_ENV=production` the server refuses to start without a valid `PUBLIC_ORIGIN` and a
+`DAILY_SALT` of 16+ characters (`openssl rand -hex 32`; see [competitive](competitive.md)), and
 session cookies are marked `Secure`.
 
 ## Docker
 
 ```bash
-cp .env.example .env    # set DOMAIN
+cp .env.example .env    # set DOMAIN and DAILY_SALT
 docker compose up -d --build
 ```
 
@@ -33,7 +36,7 @@ check on `/api/health`.
 
 ```bash
 pnpm install --frozen-lockfile && pnpm build
-NODE_ENV=production PUBLIC_ORIGIN=https://cards.example.com pnpm start
+NODE_ENV=production PUBLIC_ORIGIN=https://cards.example.com DAILY_SALT=your-long-secret pnpm start
 ```
 
 Put any TLS reverse proxy in front and set `TRUST_PROXY=1` if it sets `X-Forwarded-For`.

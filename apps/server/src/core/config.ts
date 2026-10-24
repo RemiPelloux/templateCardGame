@@ -8,6 +8,12 @@ export type PasswordCost = { N: number; r: number; p: number };
 export const PRODUCTION_COST: PasswordCost = { N: 2 ** 17, r: 8, p: 1 };
 /** Fast and weak: test servers only, refused in production. */
 export const TEST_COST: PasswordCost = { N: 2 ** 10, r: 8, p: 1 };
+/** The daily challenge's calendar: a new deal at midnight here. */
+export const DEFAULT_DAILY_TIME_ZONE = 'Europe/Paris';
+/** Development only: production refuses to start without its own `DAILY_SALT`. */
+const DEV_DAILY_SALT = 'dev-daily-salt';
+/** Long enough that the salt cannot be guessed by trying them all. */
+const MIN_DAILY_SALT_LENGTH = 16;
 
 export type Config = {
   port: number;
@@ -25,6 +31,10 @@ export type Config = {
   relaxedLimits: boolean;
   /** Where server errors are announced (ntfy, Discord, Slack); unset sends nothing. */
   alertWebhookUrl: string | undefined;
+  /** Secret mixed into each daily deal's seed, so the deal cannot be computed from the date. */
+  dailySalt: string;
+  /** IANA time zone whose midnight starts a new daily challenge. */
+  dailyTimeZone: string;
 };
 
 /** Reads the environment once, and refuses to start a production server that is misconfigured. */
@@ -42,7 +52,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     passwordCost: env.PASSWORD_COST === 'test' ? TEST_COST : PRODUCTION_COST,
     relaxedLimits: env.RELAXED_LIMITS === '1',
     alertWebhookUrl: env.ALERT_WEBHOOK_URL || undefined,
+    dailySalt: env.DAILY_SALT || DEV_DAILY_SALT,
+    dailyTimeZone: env.DAILY_TIME_ZONE || DEFAULT_DAILY_TIME_ZONE,
   };
+  // Throws a RangeError at start-up rather than on the first daily request.
+  new Intl.DateTimeFormat('en', { timeZone: config.dailyTimeZone });
   if (production) checkProduction(config);
   return config;
 }
@@ -52,4 +66,8 @@ function checkProduction(config: Config) {
     throw new Error('Production needs PUBLIC_ORIGIN set to the exact https:// origin.');
   if (config.passwordCost !== PRODUCTION_COST || config.relaxedLimits)
     throw new Error('PASSWORD_COST and RELAXED_LIMITS are for test servers only.');
+  if (config.dailySalt === DEV_DAILY_SALT || config.dailySalt.length < MIN_DAILY_SALT_LENGTH)
+    throw new Error(
+      `Production needs DAILY_SALT: a secret of ${MIN_DAILY_SALT_LENGTH}+ characters.`,
+    );
 }

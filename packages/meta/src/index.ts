@@ -3,6 +3,7 @@
  * server (which decides) and the client (which displays). No I/O, no text: ids and numbers.
  */
 export * from './achievements';
+export * from './elo';
 export * from './items';
 export * from './levels';
 export * from './missions';

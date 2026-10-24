@@ -82,6 +82,7 @@ More in [architecture](docs/architecture.md).
 | [Multiplayer](docs/multiplayer.md)           | Rooms, revisions, live events, bots, HTTP endpoints   |
 | [Progression](docs/progression.md)           | XP, levels, missions, achievements, seasons, profiles |
 | [Social](docs/social.md)                     | Friends, presence, invites, blocks, reports           |
+| [Competitive](docs/competitive.md)           | Daily challenge, rankings, Elo and matchmaking        |
 | [Testing](docs/testing.md)                   | Unit, conformance, HTTP, browser tests and simulation |
 | [Design](docs/design.md)                     | Tokens, theming, components, accessibility            |
 | [Deployment](docs/deployment.md)             | Configuration, Docker, Caddy, backups                 |
