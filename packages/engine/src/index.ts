@@ -52,3 +52,10 @@ export {
   readRecord,
   readString,
 } from './guards';
+export {
+  createExpansionRegistry,
+  type Expansion,
+  type ExpansionChoice,
+  type ExpansionManifest,
+  type ExpansionRegistry,
+} from './expansions';
