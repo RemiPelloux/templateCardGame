@@ -1,19 +1,9 @@
-import { expect, test, type Page } from '@playwright/test';
-
-/** Signs up a fresh account and saves its recovery codes; usernames are unique per run. */
-async function signUp(page: Page, prefix: string) {
-  const username = `${prefix}_${Date.now().toString(36)}${Math.floor(Math.random() * 1000)}`;
-  await page.goto('/register');
-  await page.getByLabel('Username').fill(username);
-  await page.getByLabel('Password').fill('correct horse battery');
-  await page.getByRole('button', { name: 'Create account' }).click();
-  await expect(page.getByRole('heading', { name: 'Your recovery codes' })).toBeVisible();
-  await page.getByRole('button', { name: 'I saved them' }).click();
-  return username;
-}
+import { expect, test } from '@playwright/test';
+import { signUp } from './support';
 
 test('sign up, create a table, add a bot, deal', async ({ page }) => {
   await signUp(page, 'ada');
+  await page.goto('/');
   await page.getByRole('button', { name: 'Create a table' }).click();
   await expect(page).toHaveURL(/\/room\/[A-Z0-9]{5}$/);
   await page.getByRole('button', { name: 'Add a bot' }).click();
@@ -25,6 +15,7 @@ test('sign up, create a table, add a bot, deal', async ({ page }) => {
 test('a guest following a table link signs up and comes back to the table', async ({ browser }) => {
   const host = await browser.newPage();
   await signUp(host, 'host');
+  await host.goto('/');
   await host.getByRole('button', { name: 'Create a table' }).click();
   await expect(host).toHaveURL(/\/room\//);
 
