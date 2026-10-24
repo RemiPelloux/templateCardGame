@@ -9,6 +9,7 @@ import {
   type Suit,
 } from '@cardgame/engine';
 import { MAX_HAND_SIZE, MIN_HAND_SIZE } from './constants';
+import { expansions } from './expansions';
 import type { Command, Options } from './types';
 
 const COMMAND_TYPES = ['play', 'draw', 'pass'] as const;
@@ -29,6 +30,7 @@ export function parseCommand(input: unknown): Command {
   return suit ? { type, cardId, suit } : { type, cardId };
 }
 
+/** Lobby options; an expansion is read with its rules version, the current one when absent. */
 export function parseOptions(input: unknown): Options {
   const raw = readRecord(input, 'options');
   const range = { min: MIN_HAND_SIZE, max: MAX_HAND_SIZE };
@@ -36,5 +38,10 @@ export function parseOptions(input: unknown): Options {
     raw.handSize === null
       ? null
       : readOptional(raw.handSize, (v) => readInteger(v, 'hand size', range));
-  return { handSize: handSize ?? null };
+  const expansion = expansions.read(raw.expansion, raw.expansionRules);
+  return {
+    handSize: handSize ?? null,
+    expansion: expansion?.id ?? null,
+    expansionRules: expansion?.rulesVersion ?? null,
+  };
 }

@@ -6,11 +6,15 @@ import {
   type MoveContext,
   type Seat,
 } from '@cardgame/engine';
-import { canPlay, drawable, isWild, topCard } from './cards';
+import { isStandard } from './card-kinds';
+import { canPlay, drawable, isWild } from './cards';
+import { hooksOf } from './extension';
+import type { PlayEffect } from './hooks';
 import type { Command, State } from './types';
 
 function nextTurn(state: State) {
-  state.turn = (state.turn + 1) % state.hands.length;
+  const after = hooksOf(state).nextSeat;
+  state.turn = after ? after(state, state.turn) : (state.turn + 1) % state.hands.length;
   state.drawn = false;
 }
 
@@ -23,27 +27,51 @@ function refillDeck(state: State, ctx: MoveContext) {
   ctx.log('reshuffle', { count: state.deck.length }, { seat: null });
 }
 
+/** One card from the deck into `seat`'s hand. */
+function drawCard(state: State, seat: Seat, ctx: MoveContext) {
+  refillDeck(state, ctx);
+  const [card] = drawFrom(state.deck, 1);
+  state.hands[seat]!.push(card!);
+  return card!;
+}
+
+/** Passes the turn, then applies a played card's effect to the player it lands on. */
+function endTurn(state: State, effect: PlayEffect, ctx: MoveContext) {
+  nextTurn(state);
+  const victim = state.turn;
+  const count = Math.min(effect.draw ?? 0, drawable(state));
+  if (count > 0) {
+    ctx.log('forcedDraw', { count }, { seat: victim });
+    for (let i = 0; i < count; i++) {
+      const card = drawCard(state, victim, ctx);
+      ctx.log('drew', { card }, { seat: victim, visibleTo: [victim] });
+    }
+  }
+  if (!effect.skip) return;
+  ctx.log('skip', undefined, { seat: victim });
+  nextTurn(state);
+}
+
 function play(state: State, command: Extract<Command, { type: 'play' }>, ctx: MoveContext) {
   const hand = state.hands[ctx.seat]!;
   const card = hand.find((c) => c.id === command.cardId);
   if (!card) throw new RuleError('That card is not in your hand.', 'CARD_NOT_FOUND');
   if (!canPlay(state, card))
     throw new RuleError('Follow the suit or the rank, or play an eight.', 'CANNOT_PLAY');
-  if (isWild(card) && !command.suit)
-    throw new RuleError('Name a suit for your eight.', 'SUIT_REQUIRED');
+  const wild = isWild(card, state);
+  if (wild && !command.suit) throw new RuleError('Name a suit for your eight.', 'SUIT_REQUIRED');
   state.discard.push(takeById(hand, card.id));
-  state.suit = isWild(card) ? command.suit! : card.suit;
+  if (wild) state.suit = command.suit!;
+  else if (isStandard(card)) state.suit = card.suit;
   state.blockedPasses = 0;
-  ctx.log('play', isWild(card) ? { card, suit: state.suit } : { card });
-  if (hand.length) nextTurn(state);
+  ctx.log('play', wild ? { card, suit: state.suit } : { card });
+  if (hand.length) endTurn(state, hooksOf(state).onPlay?.({ state, card, ctx }) ?? {}, ctx);
 }
 
 function draw(state: State, ctx: MoveContext) {
   if (state.drawn) throw new RuleError('You have already drawn this turn.', 'ALREADY_DRAWN');
   if (drawable(state) <= 0) throw new RuleError('Nothing left to draw: pass.', 'NOTHING_TO_DRAW');
-  refillDeck(state, ctx);
-  const [card] = drawFrom(state.deck, 1);
-  state.hands[ctx.seat]!.push(card!);
+  const card = drawCard(state, ctx.seat, ctx);
   state.drawn = true;
   state.blockedPasses = 0;
   ctx.log('draw', { count: 1 });
@@ -69,7 +97,7 @@ export function legalCommands(state: State, seat: Seat): Command[] {
   if (seat !== state.turn) return [];
   const plays = state.hands[seat]!.filter((card) => canPlay(state, card)).flatMap(
     (card): Command[] =>
-      isWild(card)
+      isWild(card, state)
         ? SUITS.map((suit) => ({ type: 'play', cardId: card.id, suit }))
         : [{ type: 'play', cardId: card.id }],
   );
