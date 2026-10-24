@@ -6,8 +6,15 @@ import { isConnected, seatOf, type Room } from './model';
 const statusOf = (room: Room): RoomStatus =>
   !room.match ? 'lobby' : room.match.outcome ? 'finished' : 'playing';
 
-/** Who is around: the clock, and the players whose live stream is open. */
-export type Presence = { now: number; online: ReadonlySet<string> };
+/**
+ * Who is around: the clock, the players whose live stream is open, and what each person wears
+ * (read from the economy's inventory; absent in tests that build rooms alone).
+ */
+export type Presence = {
+  now: number;
+  online: ReadonlySet<string>;
+  looks?: (accountId: string) => Record<string, string>;
+};
 
 /** What one member may see of a room: the lobby, and the match through their own seat only. */
 export function roomView(room: Room, viewer: Player, presence: Presence): RoomView {
@@ -24,6 +31,7 @@ export function roomView(room: Room, viewer: Player, presence: Presence): RoomVi
       bot: s.bot,
       host: s.player !== null && s.player === room.host,
       connected: isConnected(s, presence.now) || presence.online.has(s.player ?? ''),
+      looks: s.player && presence.looks ? presence.looks(s.player) : null,
     })),
     you: seat,
     isHost: room.host === viewer.id,

@@ -22,6 +22,11 @@ export type SeatView = {
   host: boolean;
   /** A person seen recently; bots are always connected. */
   connected: boolean;
+  /**
+   * What the person wears, item id per slot (`cardBack`, `felt`, `frame`, defaults filled in):
+   * the table rings their avatar with their frame. Null for a bot.
+   */
+  looks: Record<string, string> | null;
 };
 
 export type RoomStatus = 'lobby' | 'playing' | 'finished';

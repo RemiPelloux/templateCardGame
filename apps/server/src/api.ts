@@ -27,6 +27,7 @@ export function createServices(config: Config, now = Date.now): Services {
   migrate(db, [attemptsMigration, ...FEATURES.flatMap((f) => f.migrations ?? [])], now);
   const events = new DomainEvents();
   const attempts = new Attempts(db, now);
+  const inventory = new Inventory(db, now);
   return {
     db,
     config,
@@ -36,8 +37,13 @@ export function createServices(config: Config, now = Date.now): Services {
     limit: createLimiter(now),
     accounts: new Accounts({ db, now, events, attempts, cost: config.passwordCost }),
     wallet: new Wallet(db, now),
-    inventory: new Inventory(db, now),
-    rooms: new RoomService({ store: new RoomStore(db), events, now }),
+    inventory,
+    rooms: new RoomService({
+      store: new RoomStore(db),
+      events,
+      now,
+      looks: (accountId) => inventory.equipped(accountId),
+    }),
   };
 }
 
