@@ -10,6 +10,9 @@ const CONTENT_SECURITY_POLICY = [
   "img-src 'self' data: blob:",
   "font-src 'self'",
   "connect-src 'self'",
+  // The service worker (sw.js) and the web app manifest are served by this origin.
+  "worker-src 'self'",
+  "manifest-src 'self'",
   "object-src 'none'",
   "base-uri 'none'",
   "frame-ancestors 'none'",
