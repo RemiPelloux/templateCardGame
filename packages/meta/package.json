@@ -1,0 +1,13 @@
+{
+  "name": "@cardgame/meta",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The metagame as pure data and functions: items, levels, missions, achievements, boosters, ratings.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc -p tsconfig.json"
+  }
+}
