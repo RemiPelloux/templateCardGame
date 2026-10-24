@@ -83,6 +83,7 @@ More in [architecture](docs/architecture.md).
 | [Testing](docs/testing.md)                   | Unit, conformance, HTTP, browser tests and simulation |
 | [Design](docs/design.md)                     | Tokens, theming, components, accessibility            |
 | [Deployment](docs/deployment.md)             | Configuration, Docker, Caddy, backups                 |
+| [Operations](docs/operations.md)             | Telemetry, error log, alerts, PWA updates and icons   |
 | [Crazy Eights rules](packages/game/RULES.md) | The example game, as a rules-document template        |
 
 ## Scripts
@@ -99,6 +100,7 @@ More in [architecture](docs/architecture.md).
 | `pnpm sim`             | Bot-vs-bot statistics: `pnpm sim --games 1000 --players 4`  |
 | `pnpm verify`          | Everything CI checks, in order                              |
 | `pnpm rename`          | Rename the template to your project                         |
+| `pnpm icons`           | Draw the app icons (PWA, Apple) from the favicon            |
 
 ## Origin
 
