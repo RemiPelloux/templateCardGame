@@ -186,3 +186,16 @@ button.card {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* An expansion's own cards (packages/game SpecialCard): a jester's colours on the white face. */
+.card--joker {
+  color: var(--accent);
+}
+.card__pip--joker {
+  font-size: calc(var(--card-width) * 0.42);
+}
+.board__status {
+  margin: 0;
+  color: var(--felt-muted);
+  font-size: 14px;
+}

@@ -1,6 +1,7 @@
 import { useI18n } from '../../i18n/I18nProvider';
 import { messages } from '../../i18n/messages';
 import { Page } from '../../ui/Page';
+import { ExpansionRules } from '../dlc/ExpansionRules';
 
 /** The game's rules, section by section, straight from `game.rules` in src/game/i18n.ts. */
 export function RulesScreen() {
@@ -15,6 +16,7 @@ export function RulesScreen() {
             <p>{section.body}</p>
           </section>
         ))}
+        <ExpansionRules />
       </div>
     </Page>
   );

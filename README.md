@@ -79,6 +79,7 @@ More in [architecture](docs/architecture.md).
 | [Architecture](docs/architecture.md)         | Layers, data flow, authority, privacy, boundaries     |
 | [Engine](docs/engine.md)                     | The `GameDefinition` contract and the engine API      |
 | [Making a game](docs/making-a-game.md)       | Step-by-step derivation, with checklist               |
+| [Expansions](docs/making-an-expansion.md)    | DLC: extra cards and rules, ownership, scaffolding    |
 | [Multiplayer](docs/multiplayer.md)           | Rooms, revisions, live events, bots, HTTP endpoints   |
 | [Progression](docs/progression.md)           | XP, levels, missions, achievements, seasons, profiles |
 | [Social](docs/social.md)                     | Friends, presence, invites, blocks, reports           |
@@ -105,6 +106,7 @@ More in [architecture](docs/architecture.md).
 | `pnpm verify`          | Everything CI checks, in order                              |
 | `pnpm rename`          | Rename the template to your project                         |
 | `pnpm icons`           | Draw the app icons (PWA, Apple) from the favicon            |
+| `pnpm new:expansion`   | Scaffold an expansion (DLC) and register it                 |
 
 ## Origin
 

@@ -13,7 +13,7 @@ export const game: GameDefinition<State, Command, View, Options> = {
   name: 'Crazy Eights',
   rulesVersion: RULES_VERSION,
   players: { min: MIN_PLAYERS, max: MAX_PLAYERS },
-  defaultOptions: { handSize: null },
+  defaultOptions: { handSize: null, expansion: null, expansionRules: null },
   parseOptions,
   setup,
   actors,

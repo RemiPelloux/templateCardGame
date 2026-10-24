@@ -5,6 +5,10 @@
  */
 export { game } from './definition';
 export { bots, basicBot, DEFAULT_BOT } from './bots';
+export { isSpecial, isStandard } from './card-kinds';
 export { canPlay, handPenalty, isWild, penalty } from './cards';
 export { MAX_PLAYERS, MIN_PLAYERS } from './constants';
-export type { Command, Options, State, View } from './types';
+export { expansions } from './expansions';
+export { hooksOf } from './extension';
+export type { GameExpansion, Hooks, PlayEffect, Table } from './hooks';
+export type { Card, Command, ExpansionData, Options, SpecialCard, State, View } from './types';

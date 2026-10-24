@@ -2,6 +2,8 @@ import { navigate } from '../../app/router';
 import { useT } from '../../i18n/I18nProvider';
 import { Table } from '../../table/Table';
 import { Button } from '../../ui/Button';
+import { ExpansionSelect } from '../dlc/ExpansionSelect';
+import { useOwnedExpansions } from '../dlc/useExpansions';
 import { savePractice } from './practice-storage';
 import { useLocalMatch } from './useLocalMatch';
 
@@ -31,8 +33,19 @@ export function PracticeScreen() {
   const players = chosenPlayers();
   const t = useT();
   const controller = useLocalMatch(players);
+  const owned = useOwnedExpansions();
+  const { expansion } = controller;
+  // Members practise with the expansions they own; guests and offline players, the classic game.
+  const choices = expansion && !owned.includes(expansion) ? [...owned, expansion] : owned;
   const actions = (
     <>
+      {choices.length > 0 && (
+        <ExpansionSelect
+          value={expansion}
+          choices={choices}
+          onChange={controller.switchExpansion}
+        />
+      )}
       <Button variant="ghost" onClick={controller.restart}>
         {t('practice.newDeal')}
       </Button>

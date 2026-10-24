@@ -14,6 +14,7 @@ import { rooms } from '../features/rooms/i18n';
 import { rules } from '../features/rules/i18n';
 import { shop } from '../features/shop/i18n';
 import { telemetry } from '../features/telemetry/i18n';
+import { jokers } from '../game/expansions/jokers/i18n';
 import { game } from '../game/i18n';
 import { table } from '../table/i18n';
 import { common } from './common';
@@ -31,6 +32,7 @@ const bundles = {
   friends,
   game,
   home,
+  jokers,
   practice,
   profile,
   progression,

@@ -1,6 +1,7 @@
 import type { Options } from '@cardgame/game';
 import type {
   CommandRequest,
+  OptionsRequest,
   Player,
   RoomKind,
   RoomView,
@@ -11,7 +12,7 @@ import { CLOSED_REVISION } from '@cardgame/protocol';
 import type { DomainEvents } from '../../core/events';
 import { ApiError, notFound } from '../../core/http/errors';
 import { newRoomCode } from './codes';
-import { changeSeats, deal, join, leave, play, start } from './lobby';
+import { changeSeats, deal, join, leave, lobbyOptions, play } from './lobby';
 import { MAX_ROOMS, ROOM_IDLE_MS, seatOf, type GameMatch, type Room } from './model';
 import { playBot, scheduleBot } from './room-bots';
 import { RoomEvents } from './room-events';
@@ -31,6 +32,16 @@ export type MatchRequest = {
 };
 
 /**
+ * A feature's say on the options a host picks (the dlc feature refuses an expansion the host
+ * does not own). Throws an ApiError to refuse; runs when options are set and at every deal.
+ */
+export type OptionsGuard = (check: {
+  player: Player;
+  kind: RoomKind;
+  options: Partial<Options>;
+}) => void;
+
+/**
  * Every open room, held in memory and saved on each change. Requests go through `update`, which
  * applies one change, then `commit` bumps the revision, schedules bots, saves, archives a match
  * that just ended (announcing `match.finished`) and signals live listeners.
@@ -40,6 +51,7 @@ export class RoomService {
   /** Open live streams per room and player: an open stream means “connected”. */
   private streams = new Map<string, Map<string, number>>();
   readonly live = new RoomEvents();
+  private guards: OptionsGuard[] = [];
 
   constructor(
     private deps: {
@@ -92,8 +104,21 @@ export class RoomService {
     return this.update(code, player, (room) => changeSeats(room, player, request));
   }
 
+  /** Lets a feature refuse lobby options; call it from the feature's `start`. */
+  guardOptions(guard: OptionsGuard) {
+    this.guards.push(guard);
+  }
+
+  setOptions(code: string, player: Player, request: OptionsRequest) {
+    return this.update(code, player, (room) => this.configure(room, player, request.options));
+  }
+
+  /** Deals a new match, or a rematch once the previous one is over. */
   start(code: string, player: Player, request: StartRequest) {
-    return this.update(code, player, (room) => start(room, player, request));
+    return this.update(code, player, (room) => {
+      this.configure(room, player, request.options);
+      deal(room);
+    });
   }
 
   play(code: string, player: Player, request: CommandRequest) {
@@ -181,6 +206,13 @@ export class RoomService {
     change(room);
     this.commit(room, before);
     return roomView(room, player, this.presence(room));
+  }
+
+  /** Checks the host's options (game, then guards) and only then stores them. */
+  private configure(room: Room, player: Player, changes?: Partial<Options>) {
+    const options = lobbyOptions(room, player, changes);
+    for (const guard of this.guards) guard({ player, kind: room.kind, options });
+    room.options = options;
   }
 
   private presence(room: Room): Presence {

@@ -24,6 +24,7 @@
     "verify": "pnpm format:check && pnpm lint:boundaries && pnpm check && pnpm test && pnpm build",
     "rename": "node scripts/rename.mjs",
     "icons": "node scripts/icons.mjs",
+    "new:expansion": "node scripts/new-expansion.mjs",
     "docker:build": "docker build -t card-game-template:latest ."
   },
   "devDependencies": {

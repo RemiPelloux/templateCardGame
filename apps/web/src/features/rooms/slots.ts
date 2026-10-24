@@ -4,6 +4,7 @@ import { ResultPanel } from '../progression/ResultPanel';
 import { LobbyInvites } from '../friends/LobbyInvites';
 import { DailyResultPanel } from '../daily/DailyResultPanel';
 import { RankedResultPanel } from '../ranked/RankedResultPanel';
+import { ExpansionPanel } from '../dlc/ExpansionPanel';
 import type { RoomHandle } from './useRoom';
 
 export type RoomSlotProps = { room: RoomView; handle: RoomHandle };
@@ -14,7 +15,7 @@ export type RoomSlotProps = { room: RoomView; handle: RoomHandle };
  */
 
 /** Under the seats in the lobby: the expansion picker, inviting friends… */
-export const LOBBY_PANELS: ComponentType<RoomSlotProps>[] = [LobbyInvites];
+export const LOBBY_PANELS: ComponentType<RoomSlotProps>[] = [ExpansionPanel, LobbyInvites];
 
 /** Under the result once a match ends: experience gained, daily score, rating change… */
 export const RESULT_PANELS: ComponentType<RoomSlotProps>[] = [

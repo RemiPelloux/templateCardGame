@@ -82,6 +82,19 @@ legal commands apply, non-actors cannot act, state is JSON, your `invariant` hol
 `secrecy` check passes for each seat's view, the match ends, and it replays identically. A
 failure names the seed, player count and move, so you can replay it in a test.
 
+## Expansions
+
+```ts
+const expansions = createExpansionRegistry<Hooks>([jokers]); // checks ids and versions
+expansions.read(options.expansion, options.expansionRules); // { id, rulesVersion } | null
+expansions.playableVersion('jokers', 1); // the version, or RuleError EXPANSION_VERSION
+```
+
+An `Expansion<Hooks>` is a `manifest` (`id`, `rulesVersion`, `oldestRulesVersion`, the `item`
+that unlocks it) and the game's own `hooks`. The engine only keeps the registry; the game
+decides what its hooks are and records the choice in its options and state, so a replay deals
+the same expansion under the same rules. See [making an expansion](making-an-expansion.md).
+
 ## Kits
 
 - `standardDeck(decks?)`: the 52-card deck (`{ id: 'QH', suit: 'hearts', rank: 'Q' }`),
