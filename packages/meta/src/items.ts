@@ -85,6 +85,8 @@ export const ITEMS: readonly Item[] = [
   },
   { id: 'frame-silver', kind: 'frame', rarity: 'rare', price: 300, look: { ring: '#94a3b8' } },
   { id: 'frame-gold', kind: 'frame', rarity: 'legendary', look: { ring: '#eab308' } },
+  /** Unlocks the expansion of the same name for the tables its owner hosts (packages/game). */
+  { id: 'expansion-jokers', kind: 'expansion', rarity: 'epic', price: 800 },
 ];
 
 const byId = new Map(ITEMS.map((item) => [item.id, item]));
