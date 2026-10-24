@@ -85,6 +85,7 @@ More in [architecture](docs/architecture.md).
 | [Competitive](docs/competitive.md)           | Daily challenge, rankings, Elo and matchmaking        |
 | [Testing](docs/testing.md)                   | Unit, conformance, HTTP, browser tests and simulation |
 | [Design](docs/design.md)                     | Tokens, theming, components, accessibility            |
+| [Economy](docs/economy.md)                   | Coins, items, boosters, the shop, tuning              |
 | [Deployment](docs/deployment.md)             | Configuration, Docker, Caddy, backups                 |
 | [Operations](docs/operations.md)             | Telemetry, error log, alerts, PWA updates and icons   |
 | [Crazy Eights rules](packages/game/RULES.md) | The example game, as a rules-document template        |

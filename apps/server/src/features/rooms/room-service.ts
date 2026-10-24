@@ -42,7 +42,13 @@ export class RoomService {
   readonly live = new RoomEvents();
 
   constructor(
-    private deps: { store: RoomStore | null; events: DomainEvents | null; now: () => number },
+    private deps: {
+      store: RoomStore | null;
+      events: DomainEvents | null;
+      now: () => number;
+      /** Each person's equipped items, shown at the table (`Inventory.equipped`). */
+      looks?: (accountId: string) => Record<string, string>;
+    },
   ) {
     for (const room of deps.store?.all() ?? []) this.rooms.set(room.code, room);
   }
@@ -178,7 +184,11 @@ export class RoomService {
   }
 
   private presence(room: Room): Presence {
-    return { now: this.deps.now(), online: new Set(this.streams.get(room.code)?.keys()) };
+    return {
+      now: this.deps.now(),
+      online: new Set(this.streams.get(room.code)?.keys()),
+      looks: this.deps.looks,
+    };
   }
 
   private botMove(room: Room) {

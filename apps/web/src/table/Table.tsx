@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTableLooks } from '../features/collection/looks';
 import { Notice } from '../ui/Notice';
 import { gameUi } from '../game';
 import type { MatchController } from './controller';
@@ -17,8 +18,10 @@ type Props = {
 /** The generic table: seats on top, the game's board on the felt, the log alongside. */
 export function Table({ controller, title, actions, outcomeExtra }: Props) {
   const { Board } = gameUi;
+  // The viewer's own felt and card back recolour the table they see, wherever it is played.
+  const looks = useTableLooks();
   return (
-    <div className="table">
+    <div className="table" style={looks}>
       <header className="table__bar">
         <h1 className="table__title">{title}</h1>
         <div className="table__actions">{actions}</div>

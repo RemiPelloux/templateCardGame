@@ -4,6 +4,7 @@
  */
 export * from './achievements';
 export * from './elo';
+export * from './boosters';
 export * from './items';
 export * from './levels';
 export * from './missions';
