@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@cardgame/engine": "workspace:*",
-    "@cardgame/game": "workspace:*"
+    "@cardgame/game": "workspace:*",
+    "@cardgame/i18n": "workspace:*"
   }
 }
