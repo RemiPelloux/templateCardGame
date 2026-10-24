@@ -7,6 +7,7 @@ import { Button } from '../../ui/Button';
 import { Notice } from '../../ui/Notice';
 import { Page } from '../../ui/Page';
 import { Lobby } from './Lobby';
+import { RESULT_PANELS } from './slots';
 import { useRoom, type RoomHandle } from './useRoom';
 
 const NOT_FOUND = 404;
@@ -51,10 +52,20 @@ export function RoomScreen({ code }: { code: string }) {
     );
   if (!handle.room)
     return <Page title={t('rooms.title', { code })} lede={t('rooms.opening', { code })} narrow />;
-  if (controller)
+  if (controller) {
+    const room = handle.room;
+    const results =
+      room.status === 'finished' &&
+      RESULT_PANELS.map((Panel, i) => <Panel key={i} room={room} handle={handle} />);
     return (
-      <Table controller={controller} title={t('rooms.title', { code })} actions={leaveButton} />
+      <Table
+        controller={controller}
+        title={t('rooms.title', { code })}
+        actions={leaveButton}
+        outcomeExtra={results}
+      />
     );
+  }
   return (
     <Page title={t('rooms.title', { code })} narrow>
       <div className="row">{leaveButton}</div>
