@@ -71,6 +71,29 @@ function useAnnouncement(reveal: Reveal | undefined) {
     : t('shop.reveal.announce', params);
 }
 
+type FooterProps = { refund: number | null; onRevealAll(): void; onDone(): void };
+
+/** Before the last card: "Reveal all". After: what duplicates gave back, and "Done". */
+function RevealFooter({ refund, onRevealAll, onDone }: FooterProps) {
+  const t = useT();
+  return (
+    <>
+      {!!refund && <p className="reveal__summary">{t('shop.reveal.summary', { count: refund })}</p>}
+      <div className="row">
+        {refund === null ? (
+          <Button variant="secondary" onClick={onRevealAll}>
+            {t('shop.reveal.revealAll')}
+          </Button>
+        ) : (
+          <Button onClick={onDone} autoFocus>
+            {t('shop.reveal.done')}
+          </Button>
+        )}
+      </div>
+    </>
+  );
+}
+
 /** A booster opening in a modal dialog: the cards flip one by one, then a summary. */
 export function BoosterReveal({ opening, onDone }: { opening: OpeningResponse; onDone(): void }) {
   const t = useT();
@@ -96,20 +119,11 @@ export function BoosterReveal({ opening, onDone }: { opening: OpeningResponse; o
       <p className="reveal__status" aria-live="polite">
         {announcement}
       </p>
-      {finished && opening.refund > 0 && (
-        <p className="reveal__summary">{t('shop.reveal.summary', { count: opening.refund })}</p>
-      )}
-      <div className="row">
-        {finished ? (
-          <Button onClick={() => dialog.current?.close()} autoFocus>
-            {t('shop.reveal.done')}
-          </Button>
-        ) : (
-          <Button variant="secondary" onClick={revealAll}>
-            {t('shop.reveal.revealAll')}
-          </Button>
-        )}
-      </div>
+      <RevealFooter
+        refund={finished ? opening.refund : null}
+        onRevealAll={revealAll}
+        onDone={() => dialog.current?.close()}
+      />
     </dialog>
   );
 }
