@@ -48,13 +48,16 @@ export const boosterById = (id: string) => boosterMap.get(id);
 
 const isCosmetic = (item: Item) => (SLOTS as readonly string[]).includes(item.kind);
 
+const poolOf = (rarity: Rarity) =>
+  ITEMS.filter((item) => isCosmetic(item) && !item.starter && item.rarity === rarity);
+
 /** What boosters can reveal, by rarity: every cosmetic but the starters (expansions never). */
-export const BOOSTER_POOL: Record<Rarity, readonly Item[]> = Object.fromEntries(
-  RARITIES.map((rarity) => [
-    rarity,
-    ITEMS.filter((item) => isCosmetic(item) && !item.starter && item.rarity === rarity),
-  ]),
-) as Record<Rarity, readonly Item[]>;
+export const BOOSTER_POOL: Record<Rarity, readonly Item[]> = {
+  common: poolOf('common'),
+  rare: poolOf('rare'),
+  epic: poolOf('epic'),
+  legendary: poolOf('legendary'),
+};
 
 /** One card of an opening; a duplicate is not granted again but refunded. */
 export type Reveal = { item: string; rarity: Rarity; duplicate: boolean; refund: number };

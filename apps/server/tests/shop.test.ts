@@ -30,9 +30,9 @@ beforeEach(async () => {
 });
 
 const fund = (amount: number) => services.wallet.credit(ada.id, { amount, reason: 'test' });
-const buy = (product: string, request = crypto.randomUUID()) =>
+const buy = (product: string, request: string = crypto.randomUUID()) =>
   shop.buy({ accountId: ada.id, product, request });
-const open = (product = STANDARD, request = crypto.randomUUID()) =>
+const open = (product = STANDARD, request: string = crypto.randomUUID()) =>
   shop.openBooster({ accountId: ada.id, product, request });
 const count = (table: string) =>
   (services.db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get() as { n: number }).n;
