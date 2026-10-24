@@ -1,22 +1,25 @@
-import { HomeScreen } from '../screens/HomeScreen';
-import { NameForm } from '../screens/NameForm';
-import { PracticeScreen } from '../screens/PracticeScreen';
-import { RoomScreen } from '../screens/RoomScreen';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { I18nProvider } from '../i18n/I18nProvider';
+import { queryClient } from './query';
 import { useRoute } from './router';
-import { useSession } from './session';
+import { ScreenOutlet } from './ScreenOutlet';
+import { Shell } from './Shell';
+
+function Routed() {
+  const route = useRoute();
+  return (
+    <Shell route={route}>
+      <ScreenOutlet route={route} />
+    </Shell>
+  );
+}
 
 export function App() {
-  const route = useRoute();
-  const session = useSession();
-  if (route.name === 'practice') return <PracticeScreen />;
-  if (route.name === 'home') return <HomeScreen session={session} />;
-  const { state } = session;
-  if (state.status === 'signed-in') return <RoomScreen key={route.code} code={route.code} />;
-  if (state.status === 'loading') return <main className="centered muted">Loading…</main>;
   return (
-    <main className="centered">
-      <h1 className="table__title">Join table {route.code}</h1>
-      <NameForm onSubmit={session.signIn} />
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>
+        <Routed />
+      </I18nProvider>
+    </QueryClientProvider>
   );
 }

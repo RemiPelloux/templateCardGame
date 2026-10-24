@@ -1,34 +1,39 @@
 import type { LogEntry, Outcome, PlayingCard, Suit } from '@cardgame/engine';
-import { cardLabel, SUIT_NAME } from '../components/PlayingCard';
+import type { Translate } from '@cardgame/i18n';
+import type { AppMessages } from '../i18n/messages';
+import { cardLabel } from './PlayingCard';
 
-/** Log entries as sentences. Translating the game means translating this file and the board. */
-export function describe(entry: LogEntry, names: string[]): string {
-  const who = entry.seat === null ? 'The dealer' : (names[entry.seat] ?? `Seat ${entry.seat + 1}`);
+type T = Translate<AppMessages>;
+
+/** Log entries as sentences in the reader's language. */
+export function describe(entry: LogEntry, names: string[], t: T): string {
+  const name =
+    entry.seat === null ? t('game.log.dealer') : (names[entry.seat] ?? `#${entry.seat + 1}`);
   const card = entry.data?.card as PlayingCard | undefined;
+  const label = card ? cardLabel(card, t) : '';
   switch (entry.event) {
     case 'deal':
-      return `Each player is dealt ${String(entry.data?.handSize)} cards.`;
+      return t('game.log.deal', { handSize: Number(entry.data?.handSize) });
     case 'starter':
-      return `The starter card is the ${cardLabel(card!)}.`;
+      return t('game.log.starter', { card: label });
     case 'play': {
       const suit = entry.data?.suit as Suit | undefined;
-      return `${who} plays the ${cardLabel(card!)}${suit ? ` and names ${SUIT_NAME[suit]}` : ''}.`;
+      return suit
+        ? t('game.log.playWild', { name, card: label, suit: t(`game.suits.${suit}`) })
+        : t('game.log.play', { name, card: label });
     }
     case 'draw':
-      return `${who} draws a card.`;
+      return t('game.log.draw', { name });
     case 'drew':
-      return `You drew the ${cardLabel(card!)}.`;
+      return t('game.log.drew', { card: label });
     case 'pass':
-      return `${who} passes.`;
+      return t('game.log.pass', { name });
     case 'reshuffle':
-      return 'The discard pile is shuffled back into the deck.';
+      return t('game.log.reshuffle');
     default:
       return entry.event;
   }
 }
 
-export function outcomeReason(outcome: Outcome): string {
-  if (outcome.reason === 'BLOCKED')
-    return 'Nothing left to draw and nobody could play: the lightest hand wins.';
-  return 'Every card played! The winner scores the points left in the other hands.';
-}
+export const outcomeReason = (outcome: Outcome, t: T) =>
+  t(outcome.reason === 'BLOCKED' ? 'game.outcome.BLOCKED' : 'game.outcome.EMPTY_HAND');

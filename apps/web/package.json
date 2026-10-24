@@ -14,7 +14,10 @@
   "dependencies": {
     "@cardgame/engine": "workspace:*",
     "@cardgame/game": "workspace:*",
+    "@cardgame/i18n": "workspace:*",
+    "@cardgame/meta": "workspace:*",
     "@cardgame/protocol": "workspace:*",
+    "@tanstack/react-query": "5.104.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

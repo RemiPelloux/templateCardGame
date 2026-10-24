@@ -1,25 +1,35 @@
+import { useQuery } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { MAX_PLAYERS, MIN_PLAYERS } from '@cardgame/game';
-import { api, isRoomCode, normalizeRoomCode, type RoomView } from '@cardgame/protocol';
-import { navigate } from '../app/router';
-import type { useSession } from '../app/session';
-import { Button } from '../components/Button';
-import { Notice } from '../components/Notice';
-import { http } from '../net/http';
-import { NameForm } from './NameForm';
-import { startPractice } from './PracticeScreen';
+import {
+  isRoomCode,
+  normalizeRoomCode,
+  roomApi,
+  type RoomKind,
+  type RoomView,
+} from '@cardgame/protocol';
+import { Link } from '../../app/Link';
+import { navigate } from '../../app/router';
+import { useI18n } from '../../i18n/I18nProvider';
+import { http } from '../../net/http';
+import { Button } from '../../ui/Button';
+import { Notice } from '../../ui/Notice';
+import { useAction } from '../../ui/useAction';
+import { useSession } from '../account/useSession';
+import { startPractice } from '../practice/PracticeScreen';
 
 const DEFAULT_PRACTICE_PLAYERS = 3;
 
 function Practice() {
+  const { t } = useI18n();
   const [players, setPlayers] = useState(DEFAULT_PRACTICE_PLAYERS);
   return (
     <section className="panel">
-      <h2>Practice</h2>
-      <p className="muted">Play against bots, right here. Works offline.</p>
+      <h2>{t('home.practice.title')}</h2>
+      <p className="muted">{t('home.practice.intro')}</p>
       <div className="row">
-        <label className="field">
-          Players
+        <label className="field field--inline">
+          {t('home.practice.players')}
           <select
             className="input"
             value={players}
@@ -32,76 +42,100 @@ function Practice() {
             )}
           </select>
         </label>
-        <Button onClick={() => startPractice(players)}>Play vs bots</Button>
+        <Button onClick={() => startPractice(players)}>{t('home.practice.start')}</Button>
       </div>
     </section>
   );
 }
 
 function Online() {
+  const { t } = useI18n();
   const [code, setCode] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const { error, run, clearError, busy } = useAction();
+  const [invalid, setInvalid] = useState(false);
+  const mine = useQuery({
+    queryKey: ['rooms', 'mine'],
+    queryFn: () => http.get<{ code: string; kind: RoomKind }[]>(roomApi.mine),
+  });
   const create = () =>
-    http.post<RoomView>(api.rooms).then(
-      (room) => navigate({ name: 'room', code: room.code }),
-      (failure: Error) => setError(failure.message),
+    void run(() => http.post<RoomView>(roomApi.rooms)).then(
+      (room) => room && navigate({ name: 'room', code: room.code }),
     );
   const join = (event: FormEvent) => {
     event.preventDefault();
     const room = normalizeRoomCode(code);
+    setInvalid(!isRoomCode(room));
     if (isRoomCode(room)) navigate({ name: 'room', code: room });
-    else setError('That code does not look right.');
   };
+  const current = mine.data?.[0];
   return (
     <section className="panel">
-      <h2>Play online</h2>
-      <p className="muted">Open a table, share its code, fill empty seats with bots.</p>
-      <Button onClick={create}>Create a table</Button>
+      <h2>{t('home.online.title')}</h2>
+      <p className="muted">{t('home.online.intro')}</p>
+      {current && (
+        <Link className="button button--secondary" to={{ name: 'room', code: current.code }}>
+          {t('home.online.resume', { code: current.code })}
+        </Link>
+      )}
+      <Button onClick={create} disabled={busy}>
+        {t('home.online.create')}
+      </Button>
       <form className="row" onSubmit={join}>
         <input
           className="input input--code"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="CODE"
-          aria-label="Table code"
+          aria-label={t('home.online.code')}
           autoCapitalize="characters"
         />
         <Button type="submit" variant="secondary">
-          Join
+          {t('home.online.join')}
         </Button>
       </form>
-      <Notice message={error} onDismiss={() => setError(null)} />
+      <Notice
+        message={invalid ? t('home.online.badCode') : error}
+        onDismiss={() => (setInvalid(false), clearError())}
+      />
     </section>
   );
 }
 
-export function HomeScreen({ session }: { session: ReturnType<typeof useSession> }) {
-  const { state, signIn, signOut } = session;
+function Guest() {
+  const { t } = useI18n();
+  return (
+    <section className="panel">
+      <h2>{t('home.guest.title')}</h2>
+      <p className="muted">{t('home.guest.intro')}</p>
+      <Link className="button button--primary" to={{ name: 'register' }}>
+        {t('home.guest.register')}
+      </Link>
+      <Link className="button button--ghost" to={{ name: 'login' }}>
+        {t('home.guest.login')}
+      </Link>
+    </section>
+  );
+}
+
+export function HomeScreen() {
+  const { t } = useI18n();
+  const session = useSession();
   return (
     <main className="home">
       <header className="home__hero">
-        <p className="home__eyebrow">Card Game Template</p>
-        <h1 className="home__title">Crazy Eights</h1>
-        <p className="home__lede">
-          Match the suit or the rank. Eights are wild. Empty your hand first.
-        </p>
+        <p className="home__eyebrow">{t('common.app.tagline')}</p>
+        <h1 className="home__title">{t('game.name')}</h1>
+        <p className="home__lede">{t('game.tagline')}</p>
       </header>
       <div className="home__grid">
         <Practice />
-        {state.status === 'signed-in' && <Online />}
-        {state.status === 'guest' && <NameForm onSubmit={signIn} />}
-        {state.status === 'offline' && (
-          <p className="panel muted">The server is out of reach: practice still works.</p>
-        )}
+        {session.status === 'signed-in' && <Online />}
+        {session.status === 'guest' && <Guest />}
+        {session.status === 'offline' && <p className="panel muted">{t('home.offline')}</p>}
       </div>
-      {state.status === 'signed-in' && (
-        <p className="home__who muted">
-          Playing as <strong>{state.player.name}</strong> ·{' '}
-          <button type="button" className="link" onClick={signOut}>
-            change name
-          </button>
-        </p>
-      )}
+      <p className="home__who muted">
+        <Link to={{ name: 'rules' }}>{t('rules.title')}</Link>
+      </p>
     </main>
   );
 }

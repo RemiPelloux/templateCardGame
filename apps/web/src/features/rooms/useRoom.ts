@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Command, Options } from '@cardgame/game';
-import { api, CLOSED_REVISION, type RoomView, type SeatsRequest } from '@cardgame/protocol';
-import { http, RequestError } from './http';
+import {
+  CLOSED_REVISION,
+  roomApi as api,
+  type RoomView,
+  type SeatsRequest,
+} from '@cardgame/protocol';
+import { http, RequestError } from '../../net/http';
 
 /** A safety net under the live stream (a proxy may silently hold it back). */
 const FALLBACK_POLL_MS = 15_000;

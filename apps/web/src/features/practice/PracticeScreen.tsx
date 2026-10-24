@@ -1,8 +1,9 @@
-import { navigate } from '../app/router';
-import { Button } from '../components/Button';
-import { savePractice } from '../play/practice-storage';
-import { useLocalMatch } from '../play/useLocalMatch';
-import { Table } from '../table/Table';
+import { navigate } from '../../app/router';
+import { useT } from '../../i18n/I18nProvider';
+import { Table } from '../../table/Table';
+import { Button } from '../../ui/Button';
+import { savePractice } from './practice-storage';
+import { useLocalMatch } from './useLocalMatch';
 
 const PLAYERS_KEY = 'practice:players';
 const FALLBACK_PLAYERS = 2;
@@ -28,16 +29,17 @@ function chosenPlayers() {
 
 export function PracticeScreen() {
   const players = chosenPlayers();
+  const t = useT();
   const controller = useLocalMatch(players);
   const actions = (
     <>
       <Button variant="ghost" onClick={controller.restart}>
-        New deal
+        {t('practice.newDeal')}
       </Button>
       <Button variant="secondary" onClick={() => navigate({ name: 'home' })}>
-        Leave
+        {t('common.actions.leave')}
       </Button>
     </>
   );
-  return <Table controller={controller} title="Practice" actions={actions} />;
+  return <Table controller={controller} title={t('practice.title')} actions={actions} />;
 }

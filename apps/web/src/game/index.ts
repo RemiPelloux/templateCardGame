@@ -7,8 +7,5 @@ export const gameUi: GameUi = {
   Board,
   describe,
   outcomeReason,
-  seatSummary: (view, seat) => {
-    const count = view.state.handCounts[seat] ?? 0;
-    return `${count} card${count === 1 ? '' : 's'}`;
-  },
+  seatSummary: (view, seat, t) => t('game.seat', { count: view.state.handCounts[seat] ?? 0 }),
 };

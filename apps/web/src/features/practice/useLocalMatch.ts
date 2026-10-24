@@ -9,7 +9,8 @@ import {
   type Match,
 } from '@cardgame/engine';
 import { bots, DEFAULT_BOT, game, type Command, type Options, type State } from '@cardgame/game';
-import type { MatchController } from './controller';
+import { useI18n } from '../../i18n/I18nProvider';
+import type { MatchController } from '../../table/controller';
 import { loadPractice, savePractice } from './practice-storage';
 
 /** The person always sits in seat 0 of a practice match. */
@@ -26,6 +27,7 @@ const deal = (players: number): PracticeMatch => createMatch(game, { players });
  * protected against cheating (the full state is local). Online rooms are the authoritative mode.
  */
 export function useLocalMatch(players: number): MatchController & { restart(): void } {
+  const { t, errorText } = useI18n();
   const [match, setMatch] = useState<PracticeMatch>(() => loadPractice() ?? deal(players));
   const [error, setError] = useState<string | null>(null);
   useEffect(() => savePractice(match), [match]);
@@ -47,16 +49,19 @@ export function useLocalMatch(players: number): MatchController & { restart(): v
         setError(null);
       } catch (refused) {
         if (!isRuleError(refused)) throw refused;
-        setError(refused.message);
+        setError(errorText(refused));
       }
     },
-    [match],
+    [match, errorText],
   );
   const restart = useCallback(() => setMatch(deal(players)), [players]);
   const view = useMemo(() => viewMatch(game, match, HUMAN_SEAT), [match]);
   const names = useMemo(
-    () => Array.from({ length: match.players }, (_, i) => (i ? `Bot ${i}` : 'You')),
-    [match.players],
+    () =>
+      Array.from({ length: match.players }, (_, i) =>
+        i ? t('table.bot', { n: i }) : t('table.you'),
+      ),
+    [match.players, t],
   );
   const seatsAreBots = useMemo(() => names.map((_, i) => i !== HUMAN_SEAT), [names]);
   return {

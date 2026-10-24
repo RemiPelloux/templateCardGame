@@ -1,4 +1,7 @@
 import type { PlayingCard as Card, Suit } from '@cardgame/engine';
+import { useT } from '../i18n/I18nProvider';
+import type { Translate } from '@cardgame/i18n';
+import type { AppMessages } from '../i18n/messages';
 
 export const SUIT_GLYPH: Record<Suit, string> = {
   clubs: '♣',
@@ -6,17 +9,18 @@ export const SUIT_GLYPH: Record<Suit, string> = {
   hearts: '♥',
   spades: '♠',
 };
-export const SUIT_NAME: Record<Suit, string> = {
-  clubs: 'Clubs',
-  diamonds: 'Diamonds',
-  hearts: 'Hearts',
-  spades: 'Spades',
-};
 export const isRed = (suit: Suit) => suit === 'hearts' || suit === 'diamonds';
 
-const RANK_NAME: Record<string, string> = { A: 'Ace', J: 'Jack', Q: 'Queen', K: 'King' };
-export const cardLabel = (card: Card) =>
-  `${RANK_NAME[card.rank] ?? card.rank} of ${SUIT_NAME[card.suit]}`;
+const NAMED_RANKS = ['A', 'J', 'Q', 'K'] as const;
+type NamedRank = (typeof NAMED_RANKS)[number];
+
+/** “Queen of Hearts” / « Dame de Cœur ». */
+export function cardLabel(card: Card, t: Translate<AppMessages>) {
+  const rank = NAMED_RANKS.includes(card.rank as NamedRank)
+    ? t(`game.ranks.${card.rank as NamedRank}`)
+    : card.rank;
+  return t('game.card', { rank, suit: t(`game.suits.${card.suit}`) });
+}
 
 type Props = {
   card: Card;
@@ -27,27 +31,32 @@ type Props = {
 
 /** A face-up card of the standard deck. Custom decks swap this component for their own. */
 export function PlayingCard({ card, state = 'idle', onSelect }: Props) {
+  const t = useT();
+  const label = cardLabel(card, t);
+  const corner = (
+    <>
+      {card.rank}
+      <br />
+      {SUIT_GLYPH[card.suit]}
+    </>
+  );
   const face = (
     <>
-      <span className="card__corner">
-        {card.rank}
-        <br />
-        {SUIT_GLYPH[card.suit]}
+      <span className="card__corner" aria-hidden>
+        {corner}
       </span>
       <span className="card__pip" aria-hidden>
         {SUIT_GLYPH[card.suit]}
       </span>
       <span className="card__corner card__corner--end" aria-hidden>
-        {card.rank}
-        <br />
-        {SUIT_GLYPH[card.suit]}
+        {corner}
       </span>
     </>
   );
   const className = `card card--${state} ${isRed(card.suit) ? 'card--red' : ''}`;
   if (!onSelect)
     return (
-      <div className={className} role="img" aria-label={cardLabel(card)}>
+      <div className={className} role="img" aria-label={label}>
         {face}
       </div>
     );
@@ -55,7 +64,7 @@ export function PlayingCard({ card, state = 'idle', onSelect }: Props) {
     <button
       type="button"
       className={className}
-      aria-label={cardLabel(card)}
+      aria-label={label}
       disabled={state === 'dimmed'}
       onClick={() => onSelect(card)}
     >

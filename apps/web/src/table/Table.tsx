@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import { Notice } from '../components/Notice';
+import { Notice } from '../ui/Notice';
 import { gameUi } from '../game';
-import type { MatchController } from '../play/controller';
+import type { MatchController } from './controller';
 import { GameLog } from './GameLog';
 import { OutcomePanel } from './OutcomePanel';
 import { Seats } from './Seats';
