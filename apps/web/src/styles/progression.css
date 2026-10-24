@@ -1,0 +1,143 @@
+/* Levels, missions, achievements, the post-match rewards and profiles. */
+.progress {
+  display: grid;
+  gap: var(--space-1);
+}
+.progress__label {
+  font-size: 13px;
+  color: var(--muted);
+}
+.progress__bar {
+  width: 100%;
+  height: 10px;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.progress__bar::-webkit-progress-bar {
+  background: var(--line);
+}
+.progress__bar::-webkit-progress-value {
+  background: var(--accent);
+}
+.progress__bar::-moz-progress-bar {
+  background: var(--accent);
+}
+
+.level {
+  display: grid;
+  gap: var(--space-1);
+  min-width: min(100%, 280px);
+}
+.level__number {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.mission {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--canvas);
+}
+.mission__text {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.mission__period {
+  font-size: 15px;
+  color: var(--muted);
+  margin: 0;
+}
+.mission__state,
+.trophy__state {
+  font-weight: 600;
+  color: var(--online);
+}
+
+.trophies {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+}
+.trophy {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  padding: var(--space-3);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+}
+.trophy--unlocked {
+  border: 1px solid var(--gold);
+  background: var(--canvas);
+}
+
+.result-gains {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.gains {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.gains__chip {
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.profile__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-display);
+  font-size: 40px;
+}
+.profile__grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  margin-bottom: var(--space-4);
+}
+.stats {
+  width: 100%;
+  border-collapse: collapse;
+}
+.stats th,
+.stats td {
+  padding: var(--space-2);
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.stats tfoot th,
+.stats tfoot td {
+  font-weight: 700;
+  border-bottom: 0;
+}
