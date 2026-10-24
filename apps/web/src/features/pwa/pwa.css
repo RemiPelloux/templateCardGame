@@ -1,0 +1,26 @@
+/* Above the phone tab bar, out of the way of the table's own controls. */
+.pwa-status {
+  position: fixed;
+  inset: auto var(--space-4)
+    calc(var(--tabbar-height) + env(safe-area-inset-bottom) + var(--space-4));
+  z-index: 20;
+  display: grid;
+  gap: var(--space-2);
+  max-width: 520px;
+  margin-inline: auto;
+  pointer-events: none;
+}
+.pwa-status > * {
+  margin: 0;
+  box-shadow: var(--shadow-2);
+  pointer-events: auto;
+}
+.pwa-status__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+@media (min-width: 761px) {
+  .pwa-status {
+    bottom: var(--space-4);
+  }
+}
