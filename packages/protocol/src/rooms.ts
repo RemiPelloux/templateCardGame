@@ -10,6 +10,8 @@ export type RoomKind = 'casual' | 'daily' | 'ranked';
 export type SeatsRequest =
   { action: 'addBot'; bot?: string } | { action: 'removeBot'; seat: number };
 export type StartRequest = { options?: Partial<Options> };
+/** Lobby options the host changes before the deal (the expansion…); merged into the room's. */
+export type OptionsRequest = { options: Partial<Options> };
 /** `revision` is the room revision the player saw: a stale one is refused, never misapplied. */
 export type CommandRequest = { revision: number; command: Command };
 
@@ -55,6 +57,7 @@ export const roomApi = {
   join: (code: string) => `/api/rooms/${code}/join`,
   leave: (code: string) => `/api/rooms/${code}/leave`,
   seats: (code: string) => `/api/rooms/${code}/seats`,
+  options: (code: string) => `/api/rooms/${code}/options`,
   start: (code: string) => `/api/rooms/${code}/start`,
   commands: (code: string) => `/api/rooms/${code}/commands`,
   events: (code: string) => `/api/rooms/${code}/events`,

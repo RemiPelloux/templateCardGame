@@ -1,6 +1,7 @@
 import { act, createMatch } from '@cardgame/engine';
 import { bots, DEFAULT_BOT, game } from '@cardgame/game';
-import type { CommandRequest, Player, SeatsRequest, StartRequest } from '@cardgame/protocol';
+import type { Options } from '@cardgame/game';
+import type { CommandRequest, Player, SeatsRequest } from '@cardgame/protocol';
 import { ApiError, forbidden } from '../../core/http/errors';
 import { humans, isLive, seatOf, type Room } from './model';
 
@@ -42,13 +43,17 @@ export function changeSeats(room: Room, player: Player, request: SeatsRequest) {
   room.seats.splice(request.seat, 1);
 }
 
-/** Deals a new match, or a rematch once the previous one is over. */
-export function start(room: Room, player: Player, request: StartRequest) {
+/**
+ * The room's options with the host's `changes` merged in and checked by the game, before a deal
+ * or a rematch. The room itself is left as it is: the caller stores the result once accepted.
+ */
+export function lobbyOptions(room: Room, player: Player, changes: Partial<Options> = {}) {
   requireHost(room, player);
   requireLobby(room);
   if (room.kind !== 'casual') throw forbidden('This table deals by itself.');
-  if (request.options) room.options = { ...room.options, ...request.options };
-  deal(room);
+  const options = { ...room.options, ...changes };
+  game.parseOptions(options);
+  return options;
 }
 
 /** A new match for the seats as they are, with the room's options and fixed seed if any. */
