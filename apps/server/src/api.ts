@@ -9,7 +9,14 @@ import { notFound } from './core/http/errors';
 import { readCookie } from './core/http/io';
 import { checkOrigin } from './core/http/policy';
 import { createLimiter } from './core/http/rate-limit';
-import { context, run, Router, sendError, type Context } from './core/http/router';
+import {
+  context,
+  run,
+  Router,
+  sendError,
+  type Context,
+  type UnexpectedError,
+} from './core/http/router';
 import { FEATURES } from './features';
 import { Accounts } from './features/accounts/accounts';
 import { SESSION_COOKIE } from './features/accounts/sessions';
@@ -40,6 +47,11 @@ export function createServices(config: Config, now = Date.now): Services {
     rooms: new RoomService({ store: new RoomStore(db), events, now }),
   };
 }
+
+const requestIdOf = (res: ServerResponse) => {
+  const id = res.getHeader('X-Request-ID');
+  return typeof id === 'string' ? id : undefined;
+};
 
 function exportRoute(router: Router, services: Services) {
   router.on('GET', accountApi.export, ({ me }) => {
@@ -77,7 +89,14 @@ export function createApi(config: Config, services = createServices(config)) {
       checkOrigin(req, services.config);
       return found.handler(ctx);
     };
-    void run(guarded, context(req, res, { params: found.params, player }));
+    const report = (error: unknown) =>
+      void router.reportUnexpected({
+        error,
+        source: 'request',
+        route: `${req.method} ${found.path}`,
+        requestId: requestIdOf(res),
+      });
+    void run(guarded, context(req, res, { params: found.params, player }), report);
   }
 
   function stop() {
@@ -85,7 +104,11 @@ export function createApi(config: Config, services = createServices(config)) {
     services.db.close();
   }
 
-  return { handle, stop, services };
+  /** Hands a process-level crash to the same listeners as a failed request (`index.ts`). */
+  const reportCrash = (failure: Omit<UnexpectedError, 'route'>) =>
+    router.reportUnexpected({ ...failure, route: 'process' });
+
+  return { handle, stop, services, reportCrash };
 }
 
 export type Api = ReturnType<typeof createApi>;

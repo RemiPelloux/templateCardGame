@@ -23,6 +23,8 @@ export type Config = {
   passwordCost: PasswordCost;
   /** Test servers run many members from one address: limits are lifted. Never in production. */
   relaxedLimits: boolean;
+  /** Where server errors are announced (ntfy, Discord, Slack); unset sends nothing. */
+  alertWebhookUrl: string | undefined;
 };
 
 /** Reads the environment once, and refuses to start a production server that is misconfigured. */
@@ -39,6 +41,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     logging: env.LOG_REQUESTS !== '0',
     passwordCost: env.PASSWORD_COST === 'test' ? TEST_COST : PRODUCTION_COST,
     relaxedLimits: env.RELAXED_LIMITS === '1',
+    alertWebhookUrl: env.ALERT_WEBHOOK_URL || undefined,
   };
   if (production) checkProduction(config);
   return config;
