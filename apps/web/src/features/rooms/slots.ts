@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import type { RoomView } from '@cardgame/protocol';
+import { ExpansionPanel } from '../dlc/ExpansionPanel';
 import type { RoomHandle } from './useRoom';
 
 export type RoomSlotProps = { room: RoomView; handle: RoomHandle };
@@ -10,7 +11,7 @@ export type RoomSlotProps = { room: RoomView; handle: RoomHandle };
  */
 
 /** Under the seats in the lobby: the expansion picker, inviting friends… */
-export const LOBBY_PANELS: ComponentType<RoomSlotProps>[] = [];
+export const LOBBY_PANELS: ComponentType<RoomSlotProps>[] = [ExpansionPanel];
 
 /** Under the result once a match ends: experience gained, daily score, rating change… */
 export const RESULT_PANELS: ComponentType<RoomSlotProps>[] = [];

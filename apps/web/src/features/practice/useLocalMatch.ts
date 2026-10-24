@@ -20,13 +20,21 @@ const BOT_DELAY_MS = 700;
 
 type PracticeMatch = Match<State, Command, Options>;
 
-const deal = (players: number): PracticeMatch => createMatch(game, { players });
+/** A fresh deal; `expansion` null plays the classic game. */
+const deal = (players: number, expansion: string | null = null): PracticeMatch =>
+  createMatch(game, { players, options: { expansion } });
 
 /**
  * A match against bots, entirely in the browser: works offline, earns nothing, and is not
  * protected against cheating (the full state is local). Online rooms are the authoritative mode.
  */
-export function useLocalMatch(players: number): MatchController & { restart(): void } {
+export function useLocalMatch(players: number): MatchController & {
+  restart(): void;
+  /** The expansion this practice plays, null for the classic game. */
+  expansion: string | null;
+  /** Deals again with another expansion (or null: the classic game). */
+  switchExpansion(expansion: string | null): void;
+} {
   const { t, errorText } = useI18n();
   const [match, setMatch] = useState<PracticeMatch>(() => loadPractice() ?? deal(players));
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +62,12 @@ export function useLocalMatch(players: number): MatchController & { restart(): v
     },
     [match, errorText],
   );
-  const restart = useCallback(() => setMatch(deal(players)), [players]);
+  const expansion = match.options.expansion ?? null;
+  const restart = useCallback(() => setMatch(deal(players, expansion)), [players, expansion]);
+  const switchExpansion = useCallback(
+    (next: string | null) => setMatch(deal(players, next)),
+    [players],
+  );
   const view = useMemo(() => viewMatch(game, match, HUMAN_SEAT), [match]);
   const names = useMemo(
     () =>
@@ -74,5 +87,7 @@ export function useLocalMatch(players: number): MatchController & { restart(): v
     dismissError: () => setError(null),
     rematch: restart,
     restart,
+    expansion,
+    switchExpansion,
   };
 }

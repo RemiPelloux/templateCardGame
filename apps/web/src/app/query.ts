@@ -26,4 +26,6 @@ export const keys = {
   account: ['account'] as const,
   wallet: ['wallet'] as const,
   inventory: ['inventory'] as const,
+  /** The expansion catalog with ownership: invalidate it with the inventory. */
+  expansions: ['expansions'] as const,
 };

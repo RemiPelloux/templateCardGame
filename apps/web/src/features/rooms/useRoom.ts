@@ -79,6 +79,8 @@ export function useRoom(code: string) {
     join: () => run(post(api.join(code))),
     leave: () => run(() => http.post<undefined>(api.leave(code))),
     seats: (request: SeatsRequest) => run(post(api.seats(code), request)),
+    /** Changes lobby options before the deal (the host only). */
+    options: (options: Partial<Options>) => run(post(api.options(code), { options })),
     start: (options?: Partial<Options>) => run(post(api.start(code), options ? { options } : {})),
     play: (command: Command) =>
       run(post(api.commands(code), { revision: room?.revision ?? 0, command })),
