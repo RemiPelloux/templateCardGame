@@ -10,6 +10,7 @@ services:
       TRUST_PROXY: '1'
       DAILY_SALT: ${DAILY_SALT:?Set DAILY_SALT in .env}
       DAILY_TIME_ZONE: ${DAILY_TIME_ZONE:-Europe/Paris}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
     read_only: true
     tmpfs: [/tmp]
     security_opt: ['no-new-privileges:true']
