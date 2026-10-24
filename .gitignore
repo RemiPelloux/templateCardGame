@@ -1,0 +1,27 @@
+# Dependencies and builds
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Test output
+coverage/
+test-results/
+playwright-report/
+
+# Local data
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Environment and local overrides
+.env*
+!.env.example
+*.local
+*.log
+
+# Editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
