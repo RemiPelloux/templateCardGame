@@ -1,5 +1,6 @@
 /**
- * Bot-versus-bot statistics for balancing: `pnpm sim --games 1000 --players 4 --bot basic`.
+ * Bot-versus-bot statistics for balancing: `pnpm sim --games 1000 --players 4 --bot basic`,
+ * with an expansion: `--expansion jokers`.
  * Seat 0 plays `--bot`, the others play `--rivals` (default: the same bot). Deterministic:
  * the same arguments always print the same numbers.
  */
@@ -14,8 +15,12 @@ const { values } = parseArgs({
     bot: { type: 'string', default: DEFAULT_BOT },
     rivals: { type: 'string' },
     seed: { type: 'string', default: '1' },
+    expansion: { type: 'string' },
   },
 });
+const played = values.expansion
+  ? { ...game, defaultOptions: game.parseOptions({ expansion: values.expansion }) }
+  : game;
 
 const games = Number(values.games);
 const players = Number(values.players);
@@ -29,7 +34,7 @@ const lengths: number[] = [];
 const reasons = new Map<string, number>();
 const started = performance.now();
 for (let seed = firstSeed; seed < firstSeed + games; seed++) {
-  const match = simulate(game, { players, seed, bots: (seat) => (seat === 0 ? hero : rival) });
+  const match = simulate(played, { players, seed, bots: (seat) => (seat === 0 ? hero : rival) });
   match.outcome!.winners.forEach((seat) => wins[seat]!++);
   lengths.push(match.version);
   const reason = match.outcome!.reason ?? 'none';
@@ -40,7 +45,7 @@ const PERCENT = 100;
 const sorted = [...lengths].sort((a, b) => a - b);
 const percent = (n: number) => `${((n / games) * PERCENT).toFixed(1)}%`;
 console.log(
-  `${game.name}: ${games} games, ${players} players, seat 0 = ${values.bot}, others = ${values.rivals ?? values.bot}`,
+  `${game.name}${values.expansion ? ` + ${values.expansion}` : ''}: ${games} games, ${players} players, seat 0 = ${values.bot}, others = ${values.rivals ?? values.bot}`,
 );
 console.table(wins.map((n, seat) => ({ seat, wins: n, rate: percent(n) })));
 console.log(
