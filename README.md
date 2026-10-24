@@ -20,7 +20,7 @@ tested. Replace them with your game.
 | Social       | Friends, presence, table invites, blocks, reports                                         |
 | Competitive  | A daily challenge with streaks and rankings, ranked duels with Elo                        |
 | Client       | React 19, installable PWA, offline practice, English and French                           |
-| Operations   | Anonymous telemetry, error log with alerts, Docker and Caddy, CI                          |
+| Operations   | Anonymous telemetry, error log with alerts, Docker and Caddy                              |
 
 ## Quick start
 
@@ -30,7 +30,7 @@ You need Node 22.12 or later and pnpm 10 (`corepack enable`).
 pnpm install
 pnpm dev       # http://localhost:5173 — the app and the real API in one process
 pnpm test      # unit, rules and HTTP tests
-pnpm verify    # everything CI checks
+pnpm verify    # formatting, boundaries, types, tests, build
 ```
 
 New here? Follow **[Getting started](docs/getting-started.md)**: it takes you from this
@@ -82,7 +82,7 @@ Start with [getting started](docs/getting-started.md); every guide is listed in
 | `pnpm check`           | TypeScript in every package                                           |
 | `pnpm lint:boundaries` | Fails when a package imports something its layer may not              |
 | `pnpm format`          | Prettier (`pnpm format:check` only checks)                            |
-| `pnpm verify`          | Format, boundaries, types, tests and build: what CI runs              |
+| `pnpm verify`          | Format, boundaries, types, tests and build: run it before pushing     |
 | `pnpm sim`             | Bot-versus-bot statistics, e.g. `pnpm sim --games 1000 --players 4`   |
 | `pnpm new:expansion`   | Scaffold an expansion: `pnpm new:expansion pirates "Pirates"`         |
 | `pnpm rename`          | Rename the project: `pnpm rename "Moon Poker" moon-poker`             |

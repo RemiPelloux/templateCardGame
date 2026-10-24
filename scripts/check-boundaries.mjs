@@ -9,7 +9,7 @@
  *   web          → engine, game, i18n, meta, protocol, React, web-vitals, the PWA register
  *                  (never the server, never Node)
  *
- * Run by `pnpm lint:boundaries` and in CI. Exits 1 and lists every violation.
+ * Run by `pnpm lint:boundaries` and `pnpm verify`. Exits 1 and lists every violation.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';

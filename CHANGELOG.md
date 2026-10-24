@@ -24,6 +24,10 @@ versions follow [SemVer](https://semver.org).
   accounts, HTTP API.
 - The database defaults to `data/game.sqlite` at the repository root for every command.
 
+### Removed
+
+- The GitHub Actions workflow: checks run locally with `pnpm verify` and `pnpm test:e2e`.
+
 ### Fixed
 
 - The Docker image installs every workspace package and ships the server's sources.

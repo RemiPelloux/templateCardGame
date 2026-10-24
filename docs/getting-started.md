@@ -67,7 +67,7 @@ pnpm verify     # formatting, layer boundaries, types, tests, build
 pnpm test:e2e   # browser tests on a fresh in-memory server (port 4317)
 ```
 
-`pnpm verify` is what CI runs; [testing](testing.md) explains each layer.
+Run `pnpm verify` before every push; [testing](testing.md) explains each layer.
 
 ## 6. Make it yours
 

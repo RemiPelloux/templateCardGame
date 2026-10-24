@@ -7,7 +7,7 @@ export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
   workers: 2,
-  reporter: process.env.CI ? 'github' : 'list',
+  reporter: 'list',
   use: { baseURL: `http://127.0.0.1:${PORT}`, trace: 'retain-on-failure', locale: 'en-GB' },
   // One browser keeps a run light; add projects (phone, Firefox…) when the game needs them.
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
