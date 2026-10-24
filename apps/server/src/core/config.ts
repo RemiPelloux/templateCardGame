@@ -1,4 +1,7 @@
-import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+/** A path relative to this file; `import.meta.url` works under tsx, Vite's runner and tests alike. */
+const fromHere = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
 const DEFAULT_PORT = 3000;
 
@@ -43,8 +46,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const config: Config = {
     port: Number(env.PORT ?? DEFAULT_PORT),
     host: env.HOST ?? '0.0.0.0',
-    dbPath: env.DB_PATH ?? resolve(import.meta.dirname, '../../../../data/game.sqlite'),
-    staticDir: env.STATIC_DIR ?? resolve(import.meta.dirname, '../../../web/dist'),
+    dbPath: env.DB_PATH ?? fromHere('../../../../data/game.sqlite'),
+    staticDir: env.STATIC_DIR ?? fromHere('../../../web/dist'),
     publicOrigin: env.PUBLIC_ORIGIN || undefined,
     trustProxy: env.TRUST_PROXY === '1',
     production,
