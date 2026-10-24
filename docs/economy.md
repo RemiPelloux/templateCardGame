@@ -1,99 +1,106 @@
-# Economy: coins, items, boosters
+# Economy
 
-The metagame runs on **coins only**. There is no real money anywhere: no payment provider, no
-paid currency, nothing to buy outside the game. Members earn coins by playing (rewards credited
-by other features) and spend them in the shop.
+Members earn coins by playing and spend them in the shop on cosmetics, boosters and
+expansions. There is no real money anywhere.
 
-## Pieces
+## How it works
 
-| Where                               | Holds                                                                                      |
-| ----------------------------------- | ------------------------------------------------------------------------------------------ |
-| `packages/meta/src/items.ts`        | The item catalog: id, kind (`cardBack`, `felt`, `frame`, `expansion`), rarity, price, look |
-| `packages/meta/src/boosters.ts`     | Boosters, the duplicate refunds and `openBooster`, a pure function                         |
-| `apps/server/src/features/economy/` | `Wallet` (coins, idempotent ledger) and `Inventory` (owned, equipped)                      |
-| `apps/server/src/features/shop/`    | The shop: offers, purchases, booster openings, the `shop_orders` log                       |
-| `apps/web/src/features/shop/`       | Shop screen, booster reveal, item and booster names (`shop.items.<id>`)                    |
-| `apps/web/src/features/collection/` | Collection screen (filter, equip) and the table looks (`looks.ts`)                         |
+**Coins** live in a wallet with a ledger: every change is a row with a reason and, usually, a
+reference. A reference can be used once per member, so a reward or a purchase retried after a
+network error never pays or charges twice. The balance can never go below zero.
 
-## Coins
+| Reason               | Reference                        | Paid by                                              |
+| -------------------- | -------------------------------- | ---------------------------------------------------- |
+| `reward.match`       | `reward:<room>:<seed>:<version>` | Every finished match ([progression](progression.md)) |
+| `reward.level`       | `level:<n>`                      | Each level gained                                    |
+| `reward.season`      | `season:<season>:<step>`         | Each season step                                     |
+| `reward.achievement` | `achievement:<id>`               | Each achievement                                     |
+| `reward.mission`     | `mission:<id>:<period>`          | Each claimed mission                                 |
+| `daily`              | `daily:<day>`                    | The [daily challenge](competitive.md)                |
+| `shop.buy`           | `shop:<request>`                 | A purchase (debit)                                   |
+| `shop.refund`        | `shop-refund:<request>`          | Duplicates in a booster                              |
 
-`services.wallet` is the only way coins move. Every change is a row in `coin_ledger` with a
-`reason` and an optional `ref`; a `ref` is used once per account, so a retried reward or
-purchase never pays or charges twice. Debits refuse with `INSUFFICIENT_COINS` rather than go
-below zero. Call the wallet inside `db.transaction` together with whatever the coins pay for.
+**Items** (`packages/meta/src/items.ts`) have a permanent id, a kind, a rarity and, when sold
+directly, a price. Kinds are the three cosmetic slots — `cardBack`, `felt`, `frame` — and
+`expansion`. Every member owns one starter per slot and wears it until they equip something
+else.
 
-## Items
+| Item               | Kind      | Rarity    | Price | How to get it                           |
+| ------------------ | --------- | --------- | ----- | --------------------------------------- |
+| `back-ember`       | card back | common    | —     | Starter                                 |
+| `back-ocean`       | card back | common    | 150   | Shop, boosters                          |
+| `back-forest`      | card back | rare      | 400   | Shop, boosters                          |
+| `back-sunset`      | card back | rare      | —     | Boosters                                |
+| `back-royal`       | card back | epic      | —     | Boosters, level 25                      |
+| `back-gold`        | card back | legendary | —     | Boosters, level 50                      |
+| `felt-green`       | felt      | common    | —     | Starter                                 |
+| `felt-navy`        | felt      | common    | 200   | Shop, boosters                          |
+| `felt-teal`        | felt      | common    | 180   | Shop, boosters                          |
+| `felt-burgundy`    | felt      | rare      | 500   | Shop, boosters                          |
+| `felt-midnight`    | felt      | epic      | —     | Boosters, level 10                      |
+| `frame-none`       | frame     | common    | —     | Starter                                 |
+| `frame-bronze`     | frame     | common    | 120   | Shop, boosters                          |
+| `frame-silver`     | frame     | rare      | 300   | Shop, boosters, 50 wins, season step 30 |
+| `frame-ruby`       | frame     | epic      | —     | Boosters                                |
+| `frame-gold`       | frame     | legendary | —     | Boosters, 200 wins                      |
+| `expansion-jokers` | expansion | epic      | 800   | Shop                                    |
 
-An item has a permanent kebab-case id, a kind, a rarity and, optionally:
+**Boosters** (`packages/meta/src/boosters.ts`) reveal three items each:
 
-- `price`: it can be bought outright in the shop. Without one it only comes from boosters or
-  rewards.
-- `starter`: every account owns it from the start and wears it until something else is
-  equipped. Each slot has exactly one starter.
-- `look`: the colours the client applies: `base`/`stripe` for a card back, `felt`/`deep` for a
-  felt, `ring` for a frame.
+| Booster            | Price | Common | Rare | Epic | Legendary |
+| ------------------ | ----- | ------ | ---- | ---- | --------- |
+| `booster-standard` | 250   | 70 %   | 22 % | 7 %  | 1 %       |
+| `booster-premium`  | 600   | —      | 60 % | 30 % | 10 %      |
 
-Expansions (`kind: 'expansion'`) are bought like any priced item; they are owned, never worn,
-and boosters never reveal them.
+Each reveal draws a rarity, then an item of that rarity the member does not own yet, while
+any remain. Only then can a duplicate appear, and it is refunded instead: 25 coins for a
+common, 60 rare, 150 epic, 400 legendary. Boosters hold cosmetics only, never starters or
+expansions. The server draws with its own unpredictable seed.
 
-### Where looks show
+**The shop** lists the items for sale that the member does not own, and the boosters. A
+purchase takes the coins, grants the items, refunds duplicates and records the order in one
+transaction. The client sends a request id with each purchase: sending the same id again does
+not charge twice. A repeated item purchase answers with the current coins and inventory; a
+repeated booster answers with the same reveal. Reusing an id for another product is refused
+with `409 REQUEST_REUSED`. A member makes at most 30 purchases per minute.
 
-- The member's own **felt** and **card back** recolour the table they look at, in practice and
-  online: `useTableLooks()` sets `--felt`, `--felt-deep`, `--card-back` and
-  `--card-back-pattern` on `.table`. Starters set nothing, so the theme (and dark mode) decides.
-- Each seat's **frame** rings its avatar at online tables. The room view's `SeatView.looks`
-  carries every person's equipped item per slot (`null` for bots); the server reads it from
-  `Inventory.equipped` through the `looks` function `RoomService` receives in `api.ts`.
+**Cosmetics at the table.** The viewer's equipped felt and card back recolour their own table,
+in practice and online (`apps/web/src/features/collection/looks.ts`). At online tables each
+seat also shows its owner's frame around the avatar; the room view carries every seat's
+equipped items (`SeatView.looks`). An item can only be equipped in its own slot, so
+expansions are never "worn".
 
-## Boosters
+## Data
 
-A booster has a price, a number of reveals and a weight per rarity. `openBooster(booster,
-random, owned)` rolls a rarity for each reveal by weight, then picks an item of that rarity:
+| Table         | Holds                                                      |
+| ------------- | ---------------------------------------------------------- |
+| `wallets`     | Each member's balance                                      |
+| `coin_ledger` | Every movement, unique per member and reference            |
+| `inventory`   | Items owned beyond the starters, with where they came from |
+| `equipped`    | The item worn in each slot                                 |
+| `shop_orders` | Each purchase or opening, its price and its result         |
 
-- **Duplicate protection**: it picks among the items the member lacks while that rarity has
-  any left; an item revealed earlier in the same opening counts as owned.
-- **Refunds**: once a rarity is complete, a duplicate is not granted again but refunded
-  `DUPLICATE_REFUND[rarity]` coins.
+All are deleted with the account and included in its export.
 
-The pool is every cosmetic but the starters. The server opens with a fresh random seed and
-stores the result, so a retried request shows the same reveal instead of opening again.
+## Tuning
 
-## The shop API
+| What                             | Where                                                          |
+| -------------------------------- | -------------------------------------------------------------- |
+| Items, rarities, prices, colours | `packages/meta/src/items.ts`                                   |
+| Boosters, weights, refunds       | `packages/meta/src/boosters.ts`                                |
+| What matches pay                 | `packages/meta/src/rewards.ts` ([progression](progression.md)) |
+| Purchase rate limit              | `apps/server/src/features/shop/index.ts`                       |
 
-| Method | Path                      | Body                    | Answer                                               |
-| ------ | ------------------------- | ----------------------- | ---------------------------------------------------- |
-| GET    | `/api/shop`               |                         | `ShopView`: coins, priced items not owned, boosters  |
-| POST   | `/api/shop/buy`           | `{ item, request? }`    | `PurchaseResponse`: coins, inventory                 |
-| POST   | `/api/shop/boosters/open` | `{ booster, request? }` | `OpeningResponse`: reveals, refund, coins, inventory |
+With a complete collection, a standard booster refunds about 136 coins on average and a
+premium one about 363: always less than their price. Keep it that way when changing weights
+or refunds.
 
-`request` is an idempotency key the client picks per purchase: sending it again replays the
-first answer; reusing it for another product is refused (`REQUEST_REUSED`). Each purchase
-debits, grants and logs in one transaction. Refusals: `UNKNOWN_ITEM`, `NOT_FOR_SALE`,
-`ALREADY_OWNED`, `UNKNOWN_BOOSTER`, `INSUFFICIENT_COINS`, `RATE_LIMITED`. The account export
-includes every order; deleting an account deletes them.
+## Extending
 
-## Adding an item
+- **A new item**: add it to `ITEMS` with a new id (ids are permanent: never rename or reuse
+  one), give it a name and description in every language in
+  `apps/web/src/features/shop/i18n.ts`, and a price if the shop should sell it.
+- **A new booster**: add it to `BOOSTERS`, with its name and description in the shop bundle.
+- **A new slot**: add it to `SLOTS` with a starter item, then apply it where it is shown.
 
-1. Append it to `ITEMS` in `packages/meta/src/items.ts` with a new id (never rename or reuse
-   one), its kind, rarity, `look`, and a `price` if the shop sells it.
-2. Name and describe it in `apps/web/src/features/shop/item-text.ts`, in English and French.
-   `apps/web/tests/shop.test.ts` fails on an item without a name.
-3. `pnpm test`. A non-starter cosmetic joins the booster pool of its rarity automatically.
-
-## Adding a booster
-
-1. Append it to `BOOSTERS` in `packages/meta/src/boosters.ts`: id, price, reveals, weights.
-2. Name and describe it under `boosters` in `apps/web/src/features/shop/i18n.ts`.
-3. `pnpm test` checks it can reveal something and that its average refund stays below its price.
-
-## Tuning prices and rarities
-
-- **Prices** should be a few matches' rewards for a common item and many for a rare one; an
-  epic or legendary item is usually booster-only, which keeps boosters worth opening.
-- **Weights** are relative: `{ common: 70, rare: 22, epic: 7, legendary: 1 }` means a 1 % chance
-  of a legendary per reveal. A weight of 0 leaves a rarity out (the premium booster has no
-  commons).
-- **Refunds** soften duplicates without making boosters a coin machine: the average refund of
-  a pack whose pool is complete must stay below its price (tested).
-- `packages/meta/tests/boosters.test.ts` checks the observed rarity shares against the weights
-  over thousands of seeded openings; rerun it after any change.
+Endpoints: [HTTP API](api.md#economy) and [shop](api.md#shop).
