@@ -45,7 +45,7 @@ export const game = defineBundle({
     },
     errors: {
       CANNOT_PLAY: 'Follow the suit or the rank, or play an eight.',
-      SUIT_REQUIRED: 'Name a suit for your eight.',
+      SUIT_REQUIRED: 'Name a suit for your wild card.',
       ALREADY_DRAWN: 'You have already drawn this turn.',
       NOTHING_TO_DRAW: 'Nothing left to draw: pass.',
       MUST_DRAW: 'Draw a card before passing.',
@@ -120,7 +120,7 @@ export const game = defineBundle({
     },
     errors: {
       CANNOT_PLAY: 'Suivez la couleur ou la valeur, ou jouez un huit.',
-      SUIT_REQUIRED: 'Annoncez une couleur pour votre huit.',
+      SUIT_REQUIRED: 'Annoncez une couleur pour votre carte joker.',
       ALREADY_DRAWN: 'Vous avez déjà pioché ce tour-ci.',
       NOTHING_TO_DRAW: 'Plus rien à piocher : passez.',
       MUST_DRAW: 'Piochez une carte avant de passer.',
