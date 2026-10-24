@@ -55,7 +55,7 @@ function recentOf(services: Services, accountId: string): MatchLine[] {
       `SELECT room, kind, won, score, players, xp, ended FROM match_results
        WHERE account_id = ? ORDER BY ended DESC, id DESC LIMIT ?`,
     )
-    .all(accountId, RECENT_MATCHES) as (MatchLine & { won: number })[];
+    .all(accountId, RECENT_MATCHES) as (Omit<MatchLine, 'won'> & { won: number })[];
   return rows.map((r) => ({ ...r, won: r.won === 1 }));
 }
 

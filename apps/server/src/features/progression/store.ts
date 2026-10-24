@@ -122,7 +122,7 @@ export class ProgressStore {
         `SELECT ref, room, kind, seat, won, score, players, humans, season, xp, coins, ended
          FROM match_results WHERE account_id = ? ORDER BY ended DESC, id DESC LIMIT ?`,
       )
-      .all(accountId, limit) as (ResultRow & { won: number })[];
+      .all(accountId, limit) as (Omit<ResultRow, 'won'> & { won: number })[];
     return rows.map((r) => ({ ...r, won: r.won === 1 }));
   }
 
