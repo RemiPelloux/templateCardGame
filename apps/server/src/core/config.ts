@@ -43,7 +43,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const config: Config = {
     port: Number(env.PORT ?? DEFAULT_PORT),
     host: env.HOST ?? '0.0.0.0',
-    dbPath: env.DB_PATH ?? 'data/game.sqlite',
+    dbPath: env.DB_PATH ?? resolve(import.meta.dirname, '../../../../data/game.sqlite'),
     staticDir: env.STATIC_DIR ?? resolve(import.meta.dirname, '../../../web/dist'),
     publicOrigin: env.PUBLIC_ORIGIN || undefined,
     trustProxy: env.TRUST_PROXY === '1',
