@@ -1,5 +1,7 @@
 import type { ComponentType } from 'react';
 import type { RoomView } from '@cardgame/protocol';
+import { DailyResultPanel } from '../daily/DailyResultPanel';
+import { RankedResultPanel } from '../ranked/RankedResultPanel';
 import type { RoomHandle } from './useRoom';
 
 export type RoomSlotProps = { room: RoomView; handle: RoomHandle };
@@ -13,4 +15,4 @@ export type RoomSlotProps = { room: RoomView; handle: RoomHandle };
 export const LOBBY_PANELS: ComponentType<RoomSlotProps>[] = [];
 
 /** Under the result once a match ends: experience gained, daily score, rating change… */
-export const RESULT_PANELS: ComponentType<RoomSlotProps>[] = [];
+export const RESULT_PANELS: ComponentType<RoomSlotProps>[] = [DailyResultPanel, RankedResultPanel];

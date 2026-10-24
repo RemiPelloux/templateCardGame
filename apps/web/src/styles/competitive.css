@@ -1,0 +1,115 @@
+/* Daily challenge and ranked duels: rankings, podium, rating, and result panels at the table. */
+.compete__grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+}
+.compete__more {
+  margin-top: var(--space-6);
+}
+.compete__fine {
+  font-size: 13px;
+}
+
+.stat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0;
+}
+.stat__value {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown {
+  font-variant-numeric: tabular-nums;
+}
+
+.leaderboard__scroll {
+  overflow-x: auto;
+}
+.leaderboard {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.leaderboard th,
+.leaderboard td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.leaderboard th {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.leaderboard .leaderboard__num {
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+}
+.leaderboard tr[aria-current] {
+  background: var(--canvas);
+  font-weight: 700;
+}
+
+.podium {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  text-align: center;
+}
+.podium__place {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--canvas);
+  overflow-wrap: anywhere;
+}
+.podium__medal {
+  font-size: 28px;
+}
+
+.delta--up {
+  color: var(--online);
+}
+.delta--down {
+  color: var(--danger-ink);
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 3s;
+  }
+}
+
+.result-panel {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--canvas);
+}
