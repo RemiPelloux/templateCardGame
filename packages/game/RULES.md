@@ -43,6 +43,11 @@ there is nothing left to draw at all, players who cannot (or will not) play pass
 Each winner scores the penalty points left in the other hands: eight **50**, king, queen or jack
 **10**, ace **1**, other cards their face value.
 
+## Expansions
+
+A match may add one expansion, chosen by the host: see
+[Jokers & Tricks](src/expansions/jokers/RULES.md). Without one, these rules apply unchanged.
+
 ## Edge cases
 
 | Situation                         | Ruling                                         |

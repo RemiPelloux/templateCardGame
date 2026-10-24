@@ -79,6 +79,7 @@ More in [architecture](docs/architecture.md).
 | [Architecture](docs/architecture.md)         | Layers, data flow, authority, privacy, boundaries     |
 | [Engine](docs/engine.md)                     | The `GameDefinition` contract and the engine API      |
 | [Making a game](docs/making-a-game.md)       | Step-by-step derivation, with checklist               |
+| [Expansions](docs/making-an-expansion.md)    | DLC: extra cards and rules, ownership, scaffolding    |
 | [Multiplayer](docs/multiplayer.md)           | Rooms, revisions, live events, bots, HTTP endpoints   |
 | [Testing](docs/testing.md)                   | Unit, conformance, HTTP, browser tests and simulation |
 | [Design](docs/design.md)                     | Tokens, theming, components, accessibility            |
@@ -99,6 +100,7 @@ More in [architecture](docs/architecture.md).
 | `pnpm sim`             | Bot-vs-bot statistics: `pnpm sim --games 1000 --players 4`  |
 | `pnpm verify`          | Everything CI checks, in order                              |
 | `pnpm rename`          | Rename the template to your project                         |
+| `pnpm new:expansion`   | Scaffold an expansion (DLC) and register it                 |
 
 ## Origin
 
