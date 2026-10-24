@@ -3,6 +3,24 @@
 All notable changes to this project. Format: [Keep a Changelog](https://keepachangelog.com),
 versions follow [SemVer](https://semver.org).
 
+## [0.2.0] - 2026-10-24
+
+### Added
+
+- Translations: `@cardgame/i18n`, typed bundles per feature, English and French throughout.
+- Accounts with passwords (scrypt), recovery codes, device sessions, export and deletion.
+- Server feature modules with named migrations and domain events; coin wallet and inventory.
+- Expansions: engine registry, game hooks, the _Jokers & Tricks_ expansion, `pnpm new:expansion`.
+- Profile, XP and levels, missions, achievements and seasons, with end-of-match rewards.
+- Shop, boosters, collection and cosmetics shown at the table.
+- Friends, presence, table invites, blocks and reports with a moderation script.
+- Daily challenge with streaks and rankings; ranked duels with Elo and matchmaking.
+- Field telemetry, server error log and alerts; installable PWA with update prompt.
+
+### Changed
+
+- Guest names replaced by accounts; the protocol is split per domain.
+
 ## [0.1.0] - 2026-10-24
 
 ### Added

@@ -6,6 +6,8 @@ Start with [architecture](architecture.md), then [making a game](making-a-game.m
 - [Engine](engine.md): the `GameDefinition` contract, matches, views, bots, simulation, replay
 - [Making a game](making-a-game.md): derive your own game from the template, step by step
 - [Making an expansion](making-an-expansion.md): add a DLC of cards and rules, step by step
+- [Adding a feature](features.md): server modules, events, web folders and the registries
+- [Translations](i18n.md): how text is translated, adding a language
 - [Multiplayer](multiplayer.md): rooms, revisions, live events, bots, the HTTP API
 - [Progression](progression.md): XP, levels, missions, achievements, seasons and profiles
 - [Social](social.md): friends, presence, table invites, blocks, reports and moderation

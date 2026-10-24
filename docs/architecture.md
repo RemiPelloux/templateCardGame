@@ -95,7 +95,6 @@ Where the features left out of the template would plug in:
 
 | Feature                  | Where                                                                         |
 | ------------------------ | ----------------------------------------------------------------------------- |
-| Accounts and passwords   | Replace `identity/sessions.ts`; routes only need a `Player`                   |
 | Turn clock / AFK         | A deadline on `Room` checked in `RoomService.tick`, then `playBot`            |
 | Rankings / Elo           | Built in: daily challenge and ranked duels, see [competitive](competitive.md) |
 | Several games in one app | A registry of definitions keyed by `match.game`, picked in the lobby          |
